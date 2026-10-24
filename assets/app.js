@@ -372,10 +372,65 @@
     if (p && p.catch) p.catch(function () {});
   }
 
+  /* ---------------- 标题悬停柔光 ----------------
+     上层渐变字用径向遮罩只在光标周围露出来。遮罩位置在 rAF 里做指数平滑，
+     所以光斑是「拖」着光标走，不是死贴着——这点延迟让它像玻璃上的反光。 */
+  function mountTitleGlow() {
+    var h1 = document.querySelector('.sc-title');
+    var lit = h1 && h1.querySelector('.sc-t-lit');
+    if (!lit) return;
+
+    var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0, active = false;
+
+    function frame() {
+      cx += (tx - cx) * 0.2;
+      cy += (ty - cy) * 0.2;
+      lit.style.setProperty('--sc-mx', cx.toFixed(1) + 'px');
+      lit.style.setProperty('--sc-my', cy.toFixed(1) + 'px');
+      if (active || Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) {
+        raf = requestAnimationFrame(frame);
+      } else {
+        raf = 0;
+      }
+    }
+
+    function setR() {
+      var w = h1.getBoundingClientRect().width;
+      lit.style.setProperty('--sc-r', Math.round(Math.max(w * 0.40, 120)) + 'px');
+    }
+
+    function toLocal(e) {
+      var r = h1.getBoundingClientRect();
+      tx = e.clientX - r.left;
+      ty = e.clientY - r.top;
+    }
+
+    h1.addEventListener('pointerenter', function (e) {
+      if (e.pointerType === 'touch') return;
+      toLocal(e);
+      cx = tx; cy = ty;              // 第一次进场别从左上角飞过来
+      active = true;
+      setR();
+      h1.classList.add('is-lit');
+      if (!raf) raf = requestAnimationFrame(frame);
+    });
+    h1.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
+      toLocal(e);
+    });
+    h1.addEventListener('pointerleave', function () {
+      active = false;
+      h1.classList.remove('is-lit');
+      lit.style.setProperty('--sc-r', '0px');
+    });
+    addEventListener('resize', setR);
+  }
+
   /* ---------------- 启动 ---------------- */
   var sky = document.getElementById('sky');
   if (sky) mountClouds(sky);
   mountFilm();
+  if (!reduce) mountTitleGlow();
   mountTilt();
   mountRail();
 })();
