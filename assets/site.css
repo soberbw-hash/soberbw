@@ -31,8 +31,7 @@ a{color:inherit;text-decoration:none}
 /* ---------- 顶栏 ---------- */
 .topbar{position:fixed;left:0;right:0;top:0;z-index:100;background:rgba(10,10,9,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.07);transition:background .3s}
 .topbar .in{max-width:1600px;margin:0 auto;padding:14px var(--m);display:flex;align-items:baseline;justify-content:space-between;gap:24px;color:var(--ink-l)}
-.mark{font-size:16px;font-weight:600;letter-spacing:.02em}
-.mark span{font-weight:400;font-size:12.5px;color:var(--ink-l2);margin-left:10px}
+.mark{font-size:16px;font-weight:600;letter-spacing:.14em}
 .topbar nav{display:flex;gap:clamp(14px,2.4vw,30px);font-size:13.5px;color:var(--ink-l2)}
 .topbar nav a{padding-bottom:2px;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
 .topbar nav a:hover,.topbar nav a[aria-current]{color:var(--ink-l);border-color:var(--gold)}
@@ -305,3 +304,91 @@ body:not(.inner) :focus-visible{outline-color:var(--gold)}
 }
 /* 时间线最后一行的下边框会和下一块的顶边框叠成两条线，去掉一条 */
 .timeline .row:last-child{border-bottom:0}
+
+/* ============================================================
+   一级页：署名
+   照作品集第一页：纯黑、姓名最大、姓名下带倒影、一行身份、四个入口。
+   不放域名、不放城市、不放"做了几年"、不放清单式副标。
+   ============================================================ */
+
+body.dark{background:#000;color:#FAFAF7}
+
+.gate{
+  position:relative;
+  min-height:100vh;min-height:100svh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:clamp(48px,10vh,120px) var(--m);
+  text-align:center;
+  overflow:hidden;
+}
+
+/* 姓名 + 倒影。倒影用绝对定位，不占布局高度 */
+.sign{
+  position:relative;display:block;
+  font-size:clamp(76px,15.5vw,224px);
+  /* 字体只到 Semibold，写 700 会让浏览器合成假粗体（描边式、发虚），
+     所以用真 600，再用极细描边补一点重量。 */
+  font-weight:600;
+  -webkit-text-stroke:.016em currentColor;
+  line-height:1;letter-spacing:-.05em;
+  color:#FAFAF7;
+}
+.sign-t{display:block}
+/* 倒影：不用 mask（会被 scaleY 一起翻，方向容易搞反），
+   改在倒影内部盖一层黑渐变——翻转后自然就是"贴身处清楚、往下淡出"。 */
+.sign-r{
+  position:absolute;left:0;right:0;top:100%;
+  display:block;
+  /* 绕中心翻（绕顶边翻会把内容推到主字上方）。遮罩按元素自身坐标算：
+     底部不透明、顶部透明，翻转后就是"紧贴主字处清楚、往下淡出"。 */
+  transform:scaleY(-1);transform-origin:center;
+  color:#FAFAF7;opacity:.14;
+  pointer-events:none;user-select:none;
+  -webkit-mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,0) 40%);
+  mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,0) 40%);
+}
+
+/* 身份：名词并列，字距拉开，不解释 */
+.role{
+  margin-top:clamp(124px,18vh,200px);
+  font-size:clamp(12px,1.1vw,14.5px);
+  letter-spacing:.22em;text-indent:.22em;
+  color:#8C887E;font-weight:400;
+}
+
+.gate-nav{
+  margin-top:clamp(26px,4.2vh,50px);
+  display:flex;gap:clamp(30px,5vw,72px);
+}
+.gate-nav a{
+  font-size:clamp(12.5px,1.02vw,14px);
+  letter-spacing:.18em;text-indent:.18em;
+  color:#9A958B;
+  transition:color .4s var(--ease);
+}
+.gate-nav a:hover{color:#FAFAF7}
+
+/* 入场：慢一点，只做一次 */
+@keyframes gateIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.sign,.role,.gate-nav{animation:gateIn 1.15s var(--ease) both}
+.role{animation-delay:.14s}
+.gate-nav{animation-delay:.28s}
+
+@media (max-width:900px){
+  .sign{font-size:clamp(68px,17vw,150px)}
+  .role{margin-top:clamp(58px,10vh,110px);letter-spacing:.38em;text-indent:.38em}
+}
+@media (max-width:640px){
+  .sign{font-size:clamp(62px,20vw,110px);letter-spacing:-.04em}
+  .role{margin-top:clamp(48px,9vh,84px);font-size:12px;letter-spacing:.3em;text-indent:.3em}
+  .gate-nav{margin-top:clamp(38px,7vh,64px);gap:clamp(20px,7vw,34px)}
+  .gate-nav a{font-size:12.5px;letter-spacing:.16em;text-indent:.16em}
+}
+
+/* 占位图统一压暗去饱和：八张各唱各的调，看着像廉价滤镜 */
+.list-grid .frame svg,.vgrid .frame svg{filter:saturate(.38) brightness(.76)}
+
+/* 联系页内容少，四块撑高一点，别让页面空掉 */
+.contact-grid a{padding:clamp(16px,2.6vh,30px) 0}
+.contact-grid b{font-size:clamp(17px,1.42vw,21px)}
