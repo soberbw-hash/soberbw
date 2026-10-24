@@ -538,7 +538,10 @@ body.dark{background:#0B0F12}
   top:0;bottom:0;
   display:flex;flex-direction:column;justify-content:center;
 }
-.sc-hero-in{max-width:min(100%,780px)}
+/* 780 是「一行五十来字」的可读上限。简介那三行最长一句 51em，
+   框给到 820 是为了让它在 15px 上还留 7% 余量——正文本身比框短，
+   放宽框宽不会让字变宽，只是不让它被框卡着折。 */
+.sc-hero-in{max-width:min(100%,820px)}
 /* 文字背后单独压一小片暗场。
    全局那层 .sc-veil 是从左往右淡出的（0.62 → 62% 处归零），到正文右端只剩
    一成多一点——片子里那块亮雾一飘过来，后半行白字就只剩 3:1 左右，读得很吃力。
@@ -642,16 +645,8 @@ body.dark{background:#0B0F12}
   text-shadow:0 0 26px rgba(198,240,74,.3);
   white-space:nowrap;
 }
-.sc-sub{
-  margin-top:clamp(16px,2.8vh,32px);
-  font-size:clamp(13.5px,1.06vw,15.5px);
-  line-height:1.72;color:rgba(252,252,249,.9);
-  letter-spacing:.012em;
-  /* 一行三十来个字最好读；拉满 780 宽会到五十字，眼睛要来回找行首 */
-  max-width:40em;
-  /* 窄屏别让最后一行只剩两三个字 */
-  text-wrap:pretty;
-}
+/* 简介的最终样式在后面（搜索「首页简介」），这里不再重复定义——
+   之前有两份，后一份带 text-shadow 的才生效，改前一份等于白改。 */
 
 /* ---------- 右侧片带：竖着往上走的一列 2:1 画面 ----------
    为什么从横排改成竖排：作品八成是 2:1 的横片，塞进 9:16 的竖卡里，
@@ -758,7 +753,9 @@ body.dark{background:#0B0F12}
   .sc-en{gap:clamp(11px,3vw,18px);margin-top:18px}
   .sc-en .en{font-size:clamp(10px,2.6vw,11.5px);letter-spacing:.4em;margin-right:-.4em}
   .sc-en .sig{font-size:clamp(19px,5vw,28px)}
-  .sc-sub{font-size:13px;line-height:1.72;max-width:100%;margin-top:clamp(12px,2vh,24px)}
+  /* 简介的字号/上边距不在这里定：这条规则在文件里排在 .sc-sub 主定义之前，
+     同权重、主定义在后，写在这里会被整个盖掉（13px 从来没生效过）。
+     单栏的字号在主定义后面单独给了。 */
   .sc-rail{
     position:relative;
     left:auto;right:auto;top:auto;bottom:auto;
@@ -964,18 +961,50 @@ body.dt-page>main{width:100%;padding-top:0}
 /* 被压住的那张亮起来，邻卡稍暗一点，视线才集中 */
 .sc-rail:hover .sc-card:not(:hover){filter:brightness(.76) saturate(.82)}
 
-/* ---------- 首页简介（作品集原文三行） ---------- */
+/* ---------- 首页简介（作品集原文三行） ----------
+
+   三句话就是三行，一行一句，谁也别折。
+
+   折行的真凶不是字号，是 max-width。原来写的是 39em —— em 按自己的字号算，
+   15.26px 下就是 595px，而最长那句（「4 年+视频制作经验……」）单行要 779px。
+   于是第一句折成两行、第二句折成两行、第三句一行，右端参差成三级台阶，
+   正是「显得廉价」的那种样子。
+
+   现在宽度不再自己限，交给 .sc-hero-in 的 820px 兜底；字号反过来按
+   「最长那一行刚好放得下」倒推：779px ÷ 15.264px = 51.03em 是最长行的长度，
+   820px 的框给到 15px 还剩 7% 余量。往下按 1vw 缩，1280 时是 12.8px、
+   最长行 645px、框 669px，余 3.6%。
+   （0.523 是左栏占屏宽的比例：100% − 8vw 左边距 − 36.5vw 片带 − 3.2vw 间距。）
+
+   为什么留余量而不是压到刚好：中文字是全角，一个字正好 1em，换字体不会变宽；
+   但「4 年+」「3C 类」「Top」这些拉丁字符和空格，在 PingFang 和雅黑下宽度不同，
+   差个 1–2% 是有的。刚好贴边的话，换个系统就折了。
+
+   字距从 .012em 改成 0：中文正文字距本来就是 0，那点字距在这行长度上
+   要吃掉 8px 的预算，换不来任何观感。 */
 .sc-sub{
   margin-top:clamp(20px,3vh,34px);
   list-style:none;
-  max-width:39em;
-  font-size:clamp(13.5px,1.06vw,15.5px);
+  max-width:none;
+  font-size:clamp(12.5px,1vw,15px);
   line-height:1.72;color:rgba(252,252,249,.9);
-  letter-spacing:.012em;
   text-shadow:0 1px 20px rgba(6,10,14,.62);
+  /* 万一哪档宽度真的放不下（901–1267px 这一带：两栏但左栏不够宽），
+     宁可折成两条一样长的，也别折成「一整行 + 两个字的尾巴」——
+     前者像刻意断句，后者像排版失误。一行的时候这条不起作用。 */
+  text-wrap:balance;
 }
 .sc-sub li{position:relative;padding-left:0}
-.sc-sub li+li{margin-top:clamp(7px,.9vh,11px)}
+/* 三句之间的间隙收到 3px 上下：line-height 1.72 已经给足了行距，
+   再叠 8px 就变成「三个列表项」而不是「三行字」了。 */
+.sc-sub li+li{margin-top:clamp(2px,.35vh,5px)}
+
+/* 单栏（≤900）字号回到 13.5：这一档文字铺满整屏宽，一行五十来字放得下，
+   没必要跟着 1vw 缩到 12.5——手机上小一号是实打实的难读。
+   必须写在这里（主定义之后），否则会被上面那条盖掉。 */
+@media (max-width:900px){
+  .sc-sub{font-size:13.5px}
+}
 
 /* ---------- 列表页：真图 ---------- */
 .list-grid .frame img,.vgrid3 .frame img{
