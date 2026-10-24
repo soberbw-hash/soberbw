@@ -51,27 +51,81 @@
   </header>
 <main class="wrap tools-page">
   <div class="sec-head">
-    <div>
-      <div class="count">SOFTWARE · 5 个工具</div>
-      <h1>软件</h1>
-    </div>
-    <p>这些工具都来自制作流程里卡住的地方：判断封面点击欲、把录音变成文字稿、管住散在十个文件夹里的素材。</p>
+    <h1>软件</h1>
   </div>
 
-  <table>
-    <thead><tr><th style="width:22%">名称</th><th>解决什么</th><th style="width:13%">技术</th><th style="width:11%">更新</th><th style="width:8%">链接</th></tr></thead>
-    <tbody>
-      <tr><td class="n">bilibili-cover-preview</td><td>把封面放进近似 B 站首页和手机端推荐流里，判断它值不值得被点开。</td><td class="s">纯静态</td><td class="s">2026.08</td><td class="l"><a href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener">Demo</a></td></tr>
-      <tr><td class="n">声作<em>shengzuo</em></td><td>Windows 本地声音克隆、长稿配音与多人脚本工作台。</td><td class="s">TypeScript</td><td class="s">2026.08</td><td class="l"><a href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener">GitHub</a></td></tr>
-      <tr><td class="n">Weave</td><td>本地创作素材管理与制作工作台——素材散在十个文件夹里，需要一个地方记住它们。</td><td class="s">TypeScript</td><td class="s">2026.10</td><td class="l"><a href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener">GitHub</a></td></tr>
-      <tr><td class="n">WinGlow</td><td>让 Windows 更好看、更好用：字体、右键菜单、任务栏、窗口与开始菜单，改前备份、一键还原。</td><td class="s">Rust</td><td class="s">2026.10</td><td class="l"><a href="https://github.com/soberbw-hash/WinGlow" target="_blank" rel="noopener">GitHub</a></td></tr>
-      <tr><td class="n">WinEase</td><td>极简 Windows 工具箱：清理、空间管理、应用管理与常用系统设置。</td><td class="s">Rust</td><td class="s">2026.10</td><td class="l"><a href="https://github.com/soberbw-hash/WinEase" target="_blank" rel="noopener">GitHub</a></td></tr>
-    </tbody>
-  </table>
-
-  <section class="tools-note">
-    <p>GitHub 共 7 个公开仓库，除这 5 个工具外，另有本站源码与一个在研项目。时间跨度 2026.08–2026.10。bilibili-cover-preview 提供在线 Demo。</p>
-  </section>
+  <div class="tool-list">
+    <article class="tool">
+      <a class="tool-shot is-ui" href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener" aria-label="B 站封面预览">
+        <img src="img/tools/bili-demo.jpg" alt="B 站封面预览" loading="lazy">
+      </a>
+      <div class="tool-info">
+        <div class="tool-top">
+          <h2>B 站封面预览</h2>
+          <span class="tool-tech">纯静态 · 2026.08</span>
+        </div>
+        <p class="tool-desc">把封面放进近似 B 站首页和手机端推荐流里，判断它值不值得被点开。</p>
+        <ul class="tool-points"><li>52 张已导入的主播封面做参照</li><li>上传封面，立刻看到它在真实推荐流里的样子</li><li>纯静态页面，打开即用</li></ul>
+        <a class="tool-link" href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener">在线 Demo <span>↗</span></a>
+      </div>
+    </article>
+    <article class="tool">
+      <a class="tool-shot is-ui" href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener" aria-label="声作">
+        <img src="img/tools/shengzuo-ui.png" alt="声作" loading="lazy">
+      </a>
+      <div class="tool-info">
+        <div class="tool-top">
+          <h2>声作</h2>
+          <span class="tool-tech">TypeScript · 2026.08</span>
+        </div>
+        <p class="tool-desc">Windows 本地声音克隆、长稿配音与多人脚本工作台。</p>
+        <ul class="tool-points"><li>声音克隆在本机完成</li><li>长稿分段配音</li><li>多人脚本分配</li><li>素材不上传</li></ul>
+        <a class="tool-link" href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener">GitHub <span>↗</span></a>
+      </div>
+    </article>
+    <article class="tool">
+      <a class="tool-shot is-card" href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener" aria-label="Weave">
+        <img src="img/tools/weave-card.jpg" alt="Weave" loading="lazy">
+      </a>
+      <div class="tool-info">
+        <div class="tool-top">
+          <h2>Weave</h2>
+          <span class="tool-tech">TypeScript · 2026.10</span>
+        </div>
+        <p class="tool-desc">本地创作素材管理与制作工作台。</p>
+        <ul class="tool-points"><li>素材散在十个文件夹里，需要一个地方记住它们</li><li>管住、找到，串成一条制作线</li></ul>
+        <a class="tool-link" href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener">GitHub <span>↗</span></a>
+      </div>
+    </article>
+    <article class="tool">
+      <a class="tool-shot is-icon" href="https://github.com/soberbw-hash/WinGlow" target="_blank" rel="noopener" aria-label="WinGlow">
+        <img src="img/tools/icon-winglow.png" alt="WinGlow" loading="lazy">
+      </a>
+      <div class="tool-info">
+        <div class="tool-top">
+          <h2>WinGlow</h2>
+          <span class="tool-tech">Rust · 2026.10</span>
+        </div>
+        <p class="tool-desc">让 Windows 更好看、更好用：字体、右键菜单、任务栏、窗口与开始菜单。</p>
+        <ul class="tool-points"><li>字体、右键菜单、任务栏、窗口与开始菜单一键调整</li><li>默认 Rain 动态壁纸</li><li>修改前备份、一键还原、托盘运行</li></ul>
+        <a class="tool-link" href="https://github.com/soberbw-hash/WinGlow" target="_blank" rel="noopener">GitHub <span>↗</span></a>
+      </div>
+    </article>
+    <article class="tool">
+      <a class="tool-shot is-icon" href="https://github.com/soberbw-hash/WinEase" target="_blank" rel="noopener" aria-label="WinEase">
+        <img src="img/tools/icon-winease.png" alt="WinEase" loading="lazy">
+      </a>
+      <div class="tool-info">
+        <div class="tool-top">
+          <h2>WinEase</h2>
+          <span class="tool-tech">Rust · 2026.10</span>
+        </div>
+        <p class="tool-desc">极简 Windows 工具箱：清理、空间管理、应用管理与常用系统设置。</p>
+        <ul class="tool-points"><li>清理与空间管理</li><li>应用管理</li><li>常用系统设置</li><li>都在一个窗口里做完</li></ul>
+        <a class="tool-link" href="https://github.com/soberbw-hash/WinEase" target="_blank" rel="noopener">GitHub <span>↗</span></a>
+      </div>
+    </article>
+  </div>
 </main>
 <footer class="wrap">
     <span>© 2026 尤博文</span>

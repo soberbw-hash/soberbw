@@ -36,8 +36,8 @@
       return c;
     }
     return {
-      lit: draw('255,248,236', 0.72, 0.44, 2.2, 0.76),
-      shade: draw('96,108,120', 0.3, 0.64, 2.4, 0.9)
+      lit: draw('246,238,226', 0.5, 0.44, 2.2, 0.76),
+      shade: draw('74,86,100', 0.26, 0.64, 2.4, 0.9)
     };
   }
 
@@ -60,15 +60,15 @@
 
       var spec = mobile
         ? [
-            { y: 0.48, n: 3, s: 0.78, sp: 3, a: 0.4, depth: 0.6 },
-            { y: 0.62, n: 3, s: 1.1, sp: 6.5, a: 0.46, depth: 1.1 },
-            { y: 0.76, n: 2, s: 1.55, sp: 11, a: 0.38, depth: 1.7 }
+            { y: 0.66, n: 3, s: 0.8, sp: 3, a: 0.3, depth: 0.6 },
+            { y: 0.78, n: 3, s: 1.15, sp: 6.5, a: 0.34, depth: 1.1 },
+            { y: 0.9, n: 2, s: 1.6, sp: 11, a: 0.28, depth: 1.7 }
           ]
         : [
-            { y: 0.44, n: 7, s: 0.9, sp: 2.4, a: 0.36, depth: 0.4 },
-            { y: 0.56, n: 7, s: 1.28, sp: 5, a: 0.44, depth: 0.9 },
-            { y: 0.68, n: 6, s: 1.8, sp: 8.5, a: 0.42, depth: 1.5 },
-            { y: 0.8, n: 5, s: 2.4, sp: 13, a: 0.32, depth: 2.1 }
+            { y: 0.6, n: 6, s: 0.92, sp: 2.4, a: 0.26, depth: 0.4 },
+            { y: 0.7, n: 6, s: 1.32, sp: 5, a: 0.32, depth: 0.9 },
+            { y: 0.8, n: 5, s: 1.85, sp: 8.5, a: 0.3, depth: 1.5 },
+            { y: 0.9, n: 4, s: 2.5, sp: 13, a: 0.24, depth: 2.1 }
           ];
 
       layers = spec.map(function (L) {
@@ -77,7 +77,7 @@
           items.push({
             puff: puffs[j % puffs.length],
             x: rand(-0.15, 1.15) * W,
-            y: (L.y + rand(-0.085, 0.085)) * H,
+            y: (L.y + rand(-0.07, 0.07)) * H,
             s: L.s * rand(0.78, 1.24),
             a: L.a * rand(0.82, 1.12),
             v: L.sp * rand(0.85, 1.18)
@@ -254,3 +254,27 @@
   mountTilt();
   mountRail();
 })();
+
+/* 联系页：点一下复制微信号 */
+document.querySelectorAll('[data-copy]').forEach(function (el) {
+  el.addEventListener('click', function () {
+    var text = el.getAttribute('data-copy');
+    var hint = el.querySelector('.ct-hint');
+    var done = function () {
+      el.classList.add('copied');
+      if (hint) hint.textContent = '已复制 ' + text;
+      setTimeout(function () {
+        el.classList.remove('copied');
+        if (hint) hint.textContent = '点击复制';
+      }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, done);
+    } else {
+      var t = document.createElement('textarea');
+      t.value = text; document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t); done();
+    }
+  });
+});
