@@ -1424,3 +1424,151 @@ body.inner .contact-page .sec-head{margin-bottom:clamp(28px,4.4vh,48px)}
   .dt-gallery figure{aspect-ratio:2/1}
   .dt-gallery figure:last-child:nth-child(odd){grid-column:span 2}
 }
+
+/* ============================================================
+   滚动浏览页（browse.html）
+   作品 / 简历 / 软件 / 联系四屏拼成一条竖着滚的流。
+   为什么要一个文档：跨页做不了无缝——滚到底再触发跳转，中间必然白屏一次。
+   所以四屏必须在同一个文档里，靠 scroll-snap 吸附，靠 --vis 驱动进入动画。
+   ============================================================ */
+
+/* 吸附放在 html 上（滚动容器就是它）。用 proximity 不用 mandatory：
+   简历那一屏内容比视口高，mandatory 会把人死死按在屏顶，滚不到中间。 */
+html.snap{
+  scroll-snap-type:y proximity;
+  /* 顶栏是 fixed 的，吸附点要让开它，否则每屏标题都被压在栏下面 */
+  scroll-padding-top:clamp(64px,9vh,84px);
+}
+
+.bz{position:relative}
+
+.bz-pane{
+  position:relative;
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  /* safe center：内容不满一屏时居中（联系页就不会顶在上面留一大片空），
+     内容超过一屏时自动退化成顶对齐（作品 / 简历 / 软件三屏都超），
+     上下内边距不会被居中吃掉。不支持 safe 的浏览器走下一行的 center，
+     因为 section 高度总会被内容撑开，center 也不会溢出。 */
+  justify-content:center;
+  justify-content:safe center;
+  padding-top:clamp(84px,12vh,136px);
+  padding-bottom:clamp(48px,8vh,100px);
+  scroll-snap-align:start;
+  /* 进入视口的过程中浮现并轻轻抬起来。--vis 是 0→1 的进入程度，
+     由 scroll.js 每帧写进来——所以是「跟着滚动慢慢变」，不是一次性触发。
+     透明度不从 0 起：这些屏动辄两三千像素高，从全透明开始的话，
+     屏顶刚进视口那一段会是一片空底色，看着像卡住了。留 35% 起步就没有这个断层。 */
+  opacity:calc(.35 + var(--vis,1) * .65);
+  transform:translate3d(0,calc((1 - var(--vis,1)) * 34px),0);
+}
+
+/* 老浏览器不认 safe 时的兜底：内容超一屏就顶对齐（由 scroll.js 打上这个类） */
+.bz-pane.is-tall{justify-content:flex-start}
+
+/* 内层容器原来的上下内边距由 section 接管，不然两处相加会顶出一大截空白 */
+.bz-pane>.wrap{padding-top:0;padding-bottom:0}
+
+/* 每屏一层极淡的暖光，位置随进入程度往上走一点。
+   四屏都是米白，靠色块区分会很脏；靠这种几乎看不见的光感反而连得上。 */
+.bz-pane::before{
+  content:"";
+  position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(58% 46% at 50% calc(26% - var(--vis,0) * 14%),
+    rgba(200,180,138,.11),rgba(200,180,138,0) 72%);
+}
+
+/* 联系页原来在单独页面里靠 justify-content:center + min-height:100svh 撑满一屏，
+   在滚动流里会把内容顶到屏幕下半截。这里连同外层那条更高优先级的规则一起覆盖。
+   （body.inner .contact-page 是 (0,2,1)，所以这里必须写到 (0,3,1) 才压得住。） */
+body.inner .bz-pane .contact-page{
+  display:block;
+  min-height:0;
+  justify-content:initial;
+  padding-top:0;
+  padding-bottom:0;
+}
+.bz-pane .contact-page .facts{margin-top:clamp(28px,5vh,56px)}
+
+/* 屏与屏之间一条极淡的分隔：它随上一屏滚出视口慢慢浮现，
+   给「换章节了」一个视觉信号，但不至于像一条硬分割线。 */
+.bz-pane + .bz-pane::after{
+  content:"";
+  position:absolute;left:var(--m);right:var(--m);top:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--rule-d) 12%,var(--rule-d) 88%,transparent);
+  opacity:calc(var(--vis,0) * .9);
+  pointer-events:none;
+}
+
+/* ---------- 右侧进度：四个点，当前那个亮起来 ----------
+   点贴到屏幕最边上，标签平时收起来、鼠标移上去才出来——
+   常显会压在作品图和简历的右栏上，很碍事。 */
+.bz-dots{
+  position:fixed;right:clamp(4px,.7vw,10px);top:50%;
+  transform:translateY(-50%);
+  z-index:90;
+  display:flex;flex-direction:column;gap:2px;
+  padding:6px 0;
+}
+.bz-dots a{
+  display:flex;align-items:center;justify-content:flex-end;gap:9px;
+  padding:7px 8px;
+  font-size:10.5px;letter-spacing:.14em;color:var(--ink-d3);
+  transition:color .35s var(--ease);
+}
+.bz-dots a i{
+  flex:0 0 auto;
+  width:5px;height:5px;border-radius:50%;
+  background:currentColor;opacity:.34;
+  transition:opacity .4s var(--ease),transform .4s var(--ease),background .4s var(--ease);
+}
+.bz-dots a span{
+  opacity:0;transform:translateX(7px);
+  transition:opacity .32s var(--ease),transform .32s var(--ease);
+  white-space:nowrap;
+}
+.bz-dots a:hover{color:var(--ink-d2)}
+.bz-dots a:hover span{opacity:1;transform:none}
+.bz-dots a.on{color:var(--ink-d)}
+.bz-dots a.on i{opacity:1;transform:scale(1.7);background:var(--gold)}
+
+/* 顶栏导航：滚动到哪一屏，对应那一项就亮。
+   原来 aria-current 是构建时写死的，滚动页里由脚本改写。 */
+body.bz-page .topbar nav a[aria-current]{color:var(--ink-d);border-color:var(--gold)}
+
+/* 窄屏下顶栏原本是 static（跟着页面滚走）——单页时无所谓，反正页面短。
+   滚动页里不行：滚到简历屏中段就没有导航了，必须钉住。
+   （这条要压过 @media 里那条 .topbar{position:static}，所以带上 body.bz-page。） */
+body.bz-page .topbar{
+  position:fixed;
+  background:rgba(245,244,240,.9);
+  border-bottom:1px solid var(--rule-d);
+}
+/* 顶栏底下一条极细的金线，长度就是整页的滚动进度。
+   长滚动页最难受的是「不知道还剩多少」，这条线给一个连续的答案。 */
+body.bz-page .topbar::after{
+  content:"";
+  position:absolute;left:0;bottom:-1px;height:1px;
+  width:calc(var(--prog,0) * 100%);
+  background:var(--gold);
+  transform-origin:0 50%;
+}
+
+/* 窄屏：进度点挪到底部，横着排，别挡正文 */
+@media (max-width:760px){
+  .bz-dots{
+    right:auto;left:50%;top:auto;bottom:14px;
+    transform:translateX(-50%);
+    flex-direction:row;gap:14px;
+  }
+  .bz-dots a span{display:none}
+  .bz-dots a{padding:6px}
+  .bz-pane{padding-top:clamp(72px,10vh,104px);padding-bottom:clamp(52px,8vh,72px)}
+}
+
+/* 关掉动效时不要位移，只保留可见 */
+@media (prefers-reduced-motion:reduce){
+  html.snap{scroll-snap-type:none}
+  .bz-pane{transform:none;opacity:1}
+}
