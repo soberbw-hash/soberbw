@@ -1,0 +1,8 @@
+/* 手写签名用。Caveat，SIL Open Font License，本地自托管。 */
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('caveat-400.woff2') format('woff2');
+}
