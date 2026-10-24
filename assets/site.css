@@ -387,7 +387,7 @@ body.dark{background:#000;color:#FAFAF7}
 }
 
 /* 占位图统一压暗去饱和：八张各唱各的调，看着像廉价滤镜 */
-.list-grid .frame svg,.vgrid .frame svg{filter:saturate(.38) brightness(.76)}
+.list-grid .frame svg,.vgrid3 .frame svg{filter:saturate(.6) brightness(.92)}
 
 /* 联系页内容少，四块撑高一点，别让页面空掉 */
 .contact-grid a{padding:clamp(16px,2.6vh,30px) 0}
@@ -585,4 +585,150 @@ body.dark{background:#0B0F12}
     radial-gradient(90% 55% at 50% 76%, rgba(255,196,132,.16) 0%, rgba(255,196,132,0) 70%),
     linear-gradient(180deg, rgba(30,48,68,.28) 0%, rgba(30,48,68,0) 34%);
   mix-blend-mode:soft-light;
+}
+
+/* ============================================================
+   单部作品页（work/<slug>.html）
+   深色底 + 左侧信息 + 右侧受控尺寸的画面卡。
+   不铺满屏：占位图本身是失焦的，放大到 1440 只会变成一团灰雾。
+   ============================================================ */
+
+body.dt-page{background:var(--ground);color:var(--ink-l)}
+/* 二级页的 main 顶部留了 81px 给固定顶栏；详情页没有顶栏，必须清掉 */
+body.dt-page>main{width:100%;padding-top:0}
+
+.dt-hero{
+  display:flex;flex-direction:column;
+  min-height:78vh;min-height:78svh;
+  padding-bottom:clamp(40px,7vh,84px);
+  background:
+    radial-gradient(90% 70% at 78% 42%,rgba(200,180,138,.075) 0%,rgba(200,180,138,0) 62%),
+    var(--ground);
+}
+
+.dt-top{
+  width:100%;
+  display:flex;justify-content:space-between;align-items:baseline;gap:20px;
+  padding-top:clamp(22px,3.4vh,40px);
+  font-size:12.5px;letter-spacing:.06em;color:#7E7A6F;
+}
+.dt-top a{padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.16);transition:color .25s,border-color .25s}
+.dt-top a:hover{color:var(--ink-l);border-color:var(--gold)}
+.dt-mark{color:#A9A499;letter-spacing:.14em}
+
+/* 主体：左文右图。图的尺寸受控，占位图才看得出内容 */
+.dt-main{
+  width:100%;flex:1 0 auto;
+  display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.1fr);
+  gap:clamp(28px,5.5vw,96px);align-items:center;
+  padding-top:clamp(32px,6vh,72px);
+}
+
+.dt-kind{font-size:12px;letter-spacing:.18em;color:var(--gold);margin-bottom:clamp(14px,2vh,24px)}
+.dt-info h1{
+  font-weight:600;font-size:clamp(34px,5.4vw,82px);
+  line-height:1.12;letter-spacing:-.025em;color:var(--ink-l);
+  /* 中文标题不能按字断行，「@智云官号 视频产出」会被切成两半 */
+  word-break:keep-all;overflow-wrap:anywhere;
+}
+.dt-lead{
+  margin-top:clamp(18px,2.6vh,30px);
+  font-size:clamp(13.5px,1.06vw,15.5px);line-height:2;
+  color:#A9A499;max-width:30em;
+}
+
+.dt-quick{
+  margin-top:clamp(28px,4.6vh,52px);
+  display:grid;grid-template-columns:repeat(3,auto);gap:clamp(20px,3vw,44px);
+  justify-content:start;
+  border-top:1px solid var(--rule-l);padding-top:16px;
+}
+.dt-quick dt{font-size:11px;letter-spacing:.1em;color:#6E6A60;margin-bottom:6px}
+.dt-quick dd{font-size:13.5px;color:var(--ink-l);line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* 画面卡 */
+.dt-shot{margin:0;min-width:0}
+.dt-shot-in{
+  position:relative;overflow:hidden;
+  aspect-ratio:16/10;background:#141813;
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 40px 90px -40px rgba(0,0,0,.9),0 2px 0 rgba(255,255,255,.03) inset;
+}
+.dt-shot-in svg{width:100%;height:100%;filter:saturate(.72) contrast(1.02)}
+.dt-hero.is-v .dt-shot{max-width:min(282px,46%);margin-left:auto}
+.dt-hero.is-v .dt-shot-in{aspect-ratio:9/16}
+.dt-shot figcaption{
+  margin-top:11px;font-size:10.5px;letter-spacing:.04em;color:#5F5B53;
+  text-align:right;
+}
+.dt-hero.is-v .dt-shot figcaption{text-align:right}
+
+/* ---------- 正文 ---------- */
+.dt-body{
+  background:var(--paper);color:var(--ink-d);
+  padding-top:clamp(48px,8vh,96px);padding-bottom:clamp(44px,7vh,80px);
+  max-width:1600px;
+}
+.dt-text{max-width:44em}
+.dt-text .label{font-size:11.5px;letter-spacing:.1em;color:var(--ink-d3);margin-bottom:16px}
+.dt-text p{font-size:clamp(14.5px,1.12vw,16.5px);line-height:2.1;color:#3A3931;margin-bottom:1.05em}
+.dt-text p:last-child{margin-bottom:0}
+
+/* ---------- 上一部 / 下一部 ---------- */
+.dt-nav{
+  background:var(--paper);color:var(--ink-d);
+  display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,3vw,40px);
+  border-top:1px solid var(--rule-d);
+  padding-top:clamp(22px,3.4vh,34px);padding-bottom:clamp(52px,9vh,110px);
+  max-width:1600px;
+}
+.dt-nav a{display:block}
+.dt-nav span{display:block;font-size:11.5px;letter-spacing:.1em;color:var(--ink-d3);margin-bottom:9px;transition:color .25s}
+.dt-nav b{display:block;font-weight:500;font-size:clamp(15px,1.35vw,20px);line-height:1.4;transition:color .25s}
+.dt-next{text-align:right}
+.dt-nav a:hover b{color:var(--accent)}
+.dt-nav a:hover span{color:var(--ink-d2)}
+
+@media (max-width:900px){
+  .dt-main{grid-template-columns:1fr;gap:clamp(26px,5vh,44px);align-items:start;padding-top:clamp(28px,5vh,56px)}
+  .dt-shot{order:-1}
+  .dt-hero.is-v .dt-shot{max-width:min(300px,70%);margin-left:0}
+  .dt-info h1{max-width:none}
+  .dt-quick{grid-template-columns:repeat(3,auto);gap:clamp(16px,4vw,28px)}
+  .dt-shot figcaption{text-align:left}
+}
+@media (max-width:560px){
+  .dt-hero{min-height:auto;padding-bottom:clamp(34px,6vh,52px)}
+  .dt-quick{grid-template-columns:1fr 1fr;gap:16px 20px}
+  .dt-quick div:last-child{display:none}
+  .dt-nav{grid-template-columns:1fr;gap:22px}
+  .dt-next{text-align:left}
+}
+
+/* 首页卡片：竖屏作品窄一些，序列里才有节奏 */
+.sc-card.is-v{width:clamp(84px,8.6vw,124px)}
+@media (max-width:760px){
+  .sc-card.is-v{width:clamp(68px,17vw,92px)}
+}
+
+/* 作品列表里的竖屏卡片 */
+.list-grid a.is-v .frame{aspect-ratio:9/16;max-width:300px}
+
+/* 作品页：横屏一段、竖屏一段，竖屏用三列，避免和 16:9 挤在同一个网格里参差 */
+.sub-head{
+  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  margin-top:clamp(44px,7vh,84px);margin-bottom:clamp(20px,3vh,32px);
+  border-top:1px solid var(--rule-d);padding-top:clamp(20px,3vh,30px);
+}
+.sub-head h2{font-weight:600;font-size:clamp(18px,1.7vw,24px);line-height:1.3;letter-spacing:-.01em}
+.sub-head span{font-size:12px;color:var(--ink-d3);letter-spacing:.06em;white-space:nowrap}
+.vgrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.2vw,30px)}
+.vgrid3 a{display:block}
+.vgrid3 .frame{aspect-ratio:9/16;max-width:100%}
+.vgrid3 .cap{margin-top:11px}
+.vgrid3 .cap b{display:block;font-weight:500;font-size:clamp(14px,1.15vw,16px);line-height:1.4}
+.vgrid3 .cap i{font-style:normal;font-size:11.5px;color:var(--ink-d3)}
+.vgrid3 a:hover .cap b{color:var(--accent)}
+@media (max-width:760px){
+  .vgrid3{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
