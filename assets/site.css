@@ -1127,20 +1127,41 @@ body.dt-page>main{width:100%;padding-top:0}
 /* 选中态 */
 #exp-0:checked~.exp-list label[for="exp-0"],
 #exp-1:checked~.exp-list label[for="exp-1"],
-#exp-2:checked~.exp-list label[for="exp-2"]{
+#exp-2:checked~.exp-list label[for="exp-2"],
+#exp-3:checked~.exp-list label[for="exp-3"]{
   background:rgba(0,0,0,.04);border-left-color:var(--ink-d);
 }
 #exp-0:checked~.exp-list label[for="exp-0"] .mark,
 #exp-1:checked~.exp-list label[for="exp-1"] .mark,
-#exp-2:checked~.exp-list label[for="exp-2"] .mark{
+#exp-2:checked~.exp-list label[for="exp-2"] .mark,
+#exp-3:checked~.exp-list label[for="exp-3"] .mark{
   background:var(--ink-d);color:var(--paper);
 }
+
+/* ---------- 公司图标徽章 ----------
+   26px 的字母方块换成真 logo。字母（拍/智/森）只是没有图时的替身，
+   有 logo 就用 logo——一眼认出公司，比认一个自己起的简称有用。
+
+   为什么徽章放大到 30px：绿联和智云的标都是「色块里带字」，
+   26px 下那两个字只剩 4px 高，糊成一团；30px 能勉强看出是字。
+   白底 + 1px 内描边是因为森鑫那个 X 是白底的，不描边会浮在米白页面上。
+
+   选中态不再动徽章：字母块那种「整块反色」对图没用（图是满铺的，反色看不见），
+   而加一圈描边又太像边框——一行「背景变浅 + 左侧一道深色竖线」已经说得很清楚了，
+   再给图标套个框只是多一层噪音。 */
+.exp-list .mark.is-logo{
+  width:30px;height:30px;padding:0;
+  background:#fff;overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(20,18,16,.12);
+}
+.exp-list .mark.is-logo img{width:100%;height:100%;object-fit:cover;display:block}
 
 .exp-panes{min-width:0}
 .exp-pane{display:none}
 #exp-0:checked~.exp-panes .exp-pane:nth-child(1),
 #exp-1:checked~.exp-panes .exp-pane:nth-child(2),
-#exp-2:checked~.exp-panes .exp-pane:nth-child(3){display:block}
+#exp-2:checked~.exp-panes .exp-pane:nth-child(3),
+#exp-3:checked~.exp-panes .exp-pane:nth-child(4){display:block}
 /* 切换时不要整块一起淡进来——那块内容一次出现，视线没有落点。
    标题、副行、正文分三拍依次落位，慢半拍的那两拍反而让人觉得「翻页了」。
    display:none → block 会重启动画，所以每次点标签都会重新播。 */
@@ -1151,6 +1172,15 @@ body.dt-page>main{width:100%;padding-top:0}
 
 .exp-pane h3{font-weight:600;font-size:clamp(18px,1.6vw,24px);line-height:1.3;letter-spacing:-.01em}
 .exp-pane-meta{margin-top:6px;font-size:12px;color:var(--ink-d3);letter-spacing:.02em}
+
+/* 内容还没给的经历，先占位。
+   不能留白：右边那一栏空着，看上去跟渲染失败没区别。
+   也不能做成「敬请期待」——那是一句营销话。就老老实实说整理中。 */
+.exp-todo{
+  margin-top:clamp(18px,2.6vh,26px);
+  font-size:13px;line-height:1.7;color:var(--ink-d3);
+  letter-spacing:.02em;
+}
 
 /* ---- 打勾列表 ---- */
 .ticks{list-style:none;margin-top:clamp(18px,2.6vh,26px);display:grid;gap:clamp(12px,1.8vh,17px)}
@@ -1442,7 +1472,8 @@ body.dt-page>main{width:100%;padding-top:0}
   .exp-list label{border-left:0;border-top:2px solid transparent;margin-left:0;padding:12px 4px}
   #exp-0:checked~.exp-list label[for="exp-0"],
   #exp-1:checked~.exp-list label[for="exp-1"],
-  #exp-2:checked~.exp-list label[for="exp-2"]{border-left-color:transparent;border-top-color:var(--ink-d)}
+  #exp-2:checked~.exp-list label[for="exp-2"],
+  #exp-3:checked~.exp-list label[for="exp-3"]{border-left-color:transparent;border-top-color:var(--ink-d)}
   .skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ct-grid,.ct-links{grid-template-columns:1fr;gap:12px}
   .dt-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
