@@ -166,12 +166,10 @@
     })();
   }
 
-  /* ---------------- 卡片带：圆柱内壁弧形 ----------------
-     每张卡片的位置、尺寸、形状，都从「它离视口中心多远」推出来：
-       宽   = 基准宽 × (1 + 0.28·d²)               中间窄、两侧宽
-       左右边缘各自的高度 = 基准高 × (1 + 0.33·q^2.6)  外边缘比内边缘高 → 卡片倾斜
-       垂直中心下沉 H·0.028·d²                      像圆柱内壁的透视
-     形状用 clip-path: path() 画圆角四边形，每帧重算。 */
+  /* ---------------- 右侧片带：一列 2:1 画面匀速上移 ----------------
+     卡宽 = 片带宽，卡高 = 宽 / 2，跟原片比例一致，不裁。
+     一组 9 张的总高（约 2300px）已经超过任何屏幕高度，不需要复制克隆；
+     万一是超长屏，下面会按需再补一组。 */
   function mountRail() {
     var rail = document.querySelector('.sc-rail');
     var track = document.getElementById('rail');
@@ -180,71 +178,58 @@
     var originals = [].slice.call(track.children);
     if (!originals.length) return;
 
-    // 8 张图铺不满 1440，硬拉间距会变成「一排卡片」而不是「一圈墙」。
-    // 所以把整组图重复 3 遍，让周期足够长，间距可以压紧。
-    var REPEAT = 3;
-    var n = originals.length * REPEAT;
-    for (var r = 1; r < REPEAT; r++) {
-      originals.forEach(function (c) {
+    var W = 0, H = 0, cardW = 0, cardH = 0, pitch = 0, setH = 0, padL = 0;
+    var GAP = 0.085;     // 间距 / 卡高
+    var SHRINK = 0.055;  // 最边上缩多少：越靠边越小，像往远处退
+
+    function measure() {
+      // .sc-track 是 inset:0 铺满整个 padding box 的，左右内边距不会自己生效，
+      // 得在这里减掉再算可用宽度——否则窄屏上是「左贴边、右留 20」的偏一边。
+      var cs = getComputedStyle(rail);
+      padL = parseFloat(cs.paddingLeft) || 0;
+      var padR = parseFloat(cs.paddingRight) || 0;
+      W = rail.clientWidth - padL - padR;
+      H = rail.clientHeight;
+      // 卡宽上限还要受带子高度约束：手机端片带横跨整屏，卡宽等于带宽时 2:1 的卡
+      // 会比带子还高，只能露出中间一条。按「一屏看得见两张多一点」定，
+      // 片带才像一条还在走的胶片，而不是一张巨大的图。
+      cardW = Math.min(W, H * 0.95);
+      cardH = cardW / 2;
+      pitch = cardH * (1 + GAP);
+    }
+
+    measure();
+
+    // 一组铺不满一屏时补一组（正常屏幕用不到，超长屏兜底）
+    if (pitch * originals.length < H + cardH * 2) {
+      [].slice.call(track.children).forEach(function (c) {
         var cp = c.cloneNode(true);
         cp.setAttribute('aria-hidden', 'true');
         cp.setAttribute('tabindex', '-1');
         track.appendChild(cp);
       });
     }
-    // 再整组复制一份，滚到尾部时无缝接回开头
-    [].slice.call(track.children).forEach(function (c) {
-      var clone = c.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      clone.setAttribute('tabindex', '-1');
-      track.appendChild(clone);
-    });
     var cards = [].slice.call(track.children);
+    setH = pitch * cards.length;
 
-    var W = 0, H = 0, baseW = 0, baseH = 0, pitch = 0, setW = 0, botBase = 0;
-
-    // 圆柱内壁：卡片在中间最矮最正，越靠两侧越高，且外缘比内缘更高 → 整张卡倾斜。
-    // 参数是从参考图逐卡量出来的：高度增幅 ~1.37、指数 ~3.3、宽度几乎不变、间距恒定。
-    var GROW_H = 0.46;   // 边缘卡片高度增幅
-    var POW_H = 2.6;     // 高度曲线指数：越大越只在最外侧翘起
-    var GROW_W = 0.12;   // 边缘卡片宽度增幅（参考图几乎不放大，只靠高度出弧）
-    var BOW_X = 0.02;    // 水平外扩，几乎不用，靠间距本身撑开
-    var GAP = 1.11;      // 卡片间距 / 卡宽，参考图约 1.11，压紧才像"墙"
-    // 卡片不按中心对齐，而是站在同一条基线上。
-    // 按中心对齐时，带高是按最高的边卡算的，中间那批矮卡上下各空出 18%，
-    // 屏幕底部就露出一整条 80 多 px 的黑带（视频底本来就暗），看着像个黑框。
-    // 底部对齐之后空档全跑到上方，被标题和遮罩盖住。留 0.2 的倾斜，
-    // 让底边也跟着弧面微微上翘，不然底边会太平、像贴了一排瓷砖。
-    var BOT_TILT = 0.2;
-
-    function measure() {
-      W = rail.clientWidth;
-      H = rail.clientHeight;
-      baseH = H * 0.62;
-      botBase = H * 0.985;
-      baseW = baseH * 0.615;
-      pitch = baseW * GAP;
-      // 一圈至少要盖满一屏，否则首尾接缝会露空
-      if (pitch * n < W * 1.06) pitch = (W * 1.06) / n;
-      setW = pitch * n;
-      // 字幕原本贴着卡片底边，这里取 CSS 里的基础内边距
-      if (capPad < 0) {
-        var c0 = track.querySelector('.cap');
-        capPad = c0 ? (parseFloat(getComputedStyle(c0).bottom) || 12) : 12;
-      }
-    }
-    var capPad = -1;
+    // 光标压住的那张放大一点。倍率写在脚本里，因为 transform 每帧都要重写，
+    // 写在 CSS 的 :hover 里会被行内样式盖掉。
+    var hoverEl = null;
+    cards.forEach(function (c) {
+      c.addEventListener('mouseenter', function () { hoverEl = c; });
+      c.addEventListener('mouseleave', function () { if (hoverEl === c) hoverEl = null; });
+    });
 
     var offset = 0, vel = 0;
-    var dragging = false, lastX = 0, lastT = 0, moved = 0, paused = false;
-    var speed = reduce ? 0 : (mobile ? 14 : 26);
+    var dragging = false, lastY = 0, lastT = 0, moved = 0, paused = false;
+    var speed = reduce ? 0 : (mobile ? 11 : 18);
 
     track.addEventListener('pointerenter', function () { paused = true; });
     track.addEventListener('pointerleave', function () { paused = false; });
 
     track.addEventListener('pointerdown', function (e) {
       dragging = true; moved = 0; vel = 0;
-      lastX = e.clientX; lastT = performance.now();
+      lastY = e.clientY; lastT = performance.now();
       track.classList.add('dragging');
       track.setPointerCapture(e.pointerId);
     });
@@ -252,11 +237,11 @@
       if (!dragging) return;
       var now = performance.now();
       var dt = Math.max(8, now - lastT) / 1000;
-      var dx = e.clientX - lastX;
-      lastX = e.clientX; lastT = now;
-      moved += dx;
-      offset += dx;                 // 跟手 1:1
-      vel = dx / dt;
+      var dy = e.clientY - lastY;
+      lastY = e.clientY; lastT = now;
+      moved += dy;
+      offset += dy;                 // 跟手 1:1
+      vel = dy / dt;
     });
     function endDrag() {
       if (!dragging) return;
@@ -270,22 +255,7 @@
     track.addEventListener('pointerup', endDrag);
     track.addEventListener('pointercancel', endDrag);
 
-    measure();
     addEventListener('resize', measure);
-
-    // 圆角四边形：tl/tr/bl/br 是四条边相对元素顶部的 y
-    function quad(w, tl, bl, tr, br, r) {
-      var W1 = w.toFixed(1), R = r.toFixed(1);
-      return 'path("M' + R + ',' + tl.toFixed(1) +
-        ' L' + (w - r).toFixed(1) + ',' + tr.toFixed(1) +
-        ' Q' + W1 + ',' + tr.toFixed(1) + ' ' + W1 + ',' + (tr + r).toFixed(1) +
-        ' L' + W1 + ',' + (br - r).toFixed(1) +
-        ' Q' + W1 + ',' + br.toFixed(1) + ' ' + (w - r).toFixed(1) + ',' + br.toFixed(1) +
-        ' L' + R + ',' + bl.toFixed(1) +
-        ' Q0,' + bl.toFixed(1) + ' 0,' + (bl - r).toFixed(1) +
-        ' L0,' + (tl + r).toFixed(1) +
-        ' Q0,' + tl.toFixed(1) + ' ' + R + ',' + tl.toFixed(1) + ' Z")';
-    }
 
     var last = performance.now();
     (function loop(t) {
@@ -297,57 +267,41 @@
         vel *= Math.pow(0.05, dt);       // 速度每秒衰减到 5%
       } else if (!dragging && !paused && !reduce) {
         vel = 0;
-        offset -= speed * dt;            // 常态缓慢左移
+        offset -= speed * dt;            // 常态缓慢上移
       }
 
-      if (setW > 0) {
-        while (offset <= -setW) offset += setW;
-        while (offset > 0) offset -= setW;
+      if (setH > 0) {
+        while (offset <= -setH) offset += setH;
+        while (offset > 0) offset -= setH;
       }
 
-      var cx = W / 2, half = W / 2;
+      var cy = H / 2, reach = H / 2 + cardH / 2;
+      var leftX = padL + (W - cardW) / 2;
 
       for (var i = 0; i < cards.length; i++) {
         var el = cards[i];
-        var tt = (i * pitch + baseW / 2 + offset) - cx;
-        // 折回 [-setW/2, setW/2)，保证克隆段和原段接上
-        if (setW > 0) tt = ((tt + setW / 2) % setW + setW) % setW - setW / 2;
+        var tt = (i * pitch + offset) - cy + cardH / 2;   // 卡片中心相对视口中心
+        // 折回 [-setH/2, setH/2)，保证首尾接得上
+        if (setH > 0) tt = ((tt + setH / 2) % setH + setH) % setH - setH / 2;
 
-        var ad = Math.abs(tt) / half;
-        // 视口外就整张停写，48 张卡不必每帧都算
-        if (ad > 1.32) { el.style.visibility = 'hidden'; continue; }
+        var ad = Math.abs(tt) / reach;
+        // 视口外就整张停写
+        if (ad > 1.2) { el.style.visibility = 'hidden'; continue; }
         el.style.visibility = 'visible';
 
         var d = ad > 1 ? 1 : ad;
-        var w = baseW * (1 + GROW_W * d * d);
-        var x = cx + tt * (1 + BOW_X * (tt / half) * (tt / half));
+        var s = 1 - SHRINK * d * d;
+        if (el === hoverEl) s *= 1.035;
 
-        // 左右两条边各自按离圆心的距离求高度：外缘更远 → 更高 → 卡片自然倾斜
-        var qL = Math.abs(tt - w / 2) / half; if (qL > 1) qL = 1;
-        var qR = Math.abs(tt + w / 2) / half; if (qR > 1) qR = 1;
-        var hL = baseH * (1 + GROW_H * Math.pow(qL, POW_H));
-        var hR = baseH * (1 + GROW_H * Math.pow(qR, POW_H));
+        el.style.left = leftX.toFixed(1) + 'px';
+        el.style.top = (cy + tt - cardH / 2).toFixed(1) + 'px';
+        el.style.width = cardW.toFixed(1) + 'px';
+        el.style.height = cardH.toFixed(1) + 'px';
+        el.style.transform = s === 1 ? 'none' : 'scale(' + s.toFixed(4) + ')';
 
-        // 底边落在同一条基线上，只有一点倾斜；顶边随高度自然上翘 → 弧面还在，底部不再留空
-        var y2L = botBase - (hL - baseH) * BOT_TILT;
-        var y2R = botBase - (hR - baseH) * BOT_TILT;
-        var y1L = y2L - hL, y1R = y2R - hR;
-        var top = Math.min(y1L, y1R), bot = Math.max(y2L, y2R);
-
-        el.style.left = (x - w / 2).toFixed(1) + 'px';
-        el.style.top = top.toFixed(1) + 'px';
-        el.style.width = w.toFixed(1) + 'px';
-        el.style.height = (bot - top).toFixed(1) + 'px';
-        el.style.clipPath = quad(w, y1L - top, y2L - top, y1R - top, y2R - top, Math.max(7, w * 0.075));
-
-        // 文字只在靠中间的卡片上出现，两侧斜切后不显示，避免被裁一半
+        // 靠上下两端的卡字幕淡出，中间那张才是「当前这张」
         var cap = el.querySelector('.cap');
-        if (cap) {
-          // 弧面把矮的那条边往上切，字幕得跟着抬，否则第二行会被切掉
-          var lift = bot - Math.min(y2L, y2R);
-          cap.style.bottom = (lift + capPad).toFixed(1) + 'px';
-          cap.style.opacity = d < 0.34 ? '1' : (d > 0.72 ? '0' : ((0.72 - d) / 0.38).toFixed(2));
-        }
+        if (cap) cap.style.opacity = d < 0.5 ? '1' : (d > 0.9 ? '0' : ((0.9 - d) / 0.4).toFixed(2));
       }
       requestAnimationFrame(loop);
     })(performance.now());
