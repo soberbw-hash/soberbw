@@ -1076,7 +1076,8 @@ body.dt-page>main{width:100%;padding-top:0}
   .skill-list{grid-template-columns:1fr}
   .ticks li{grid-template-columns:1fr;gap:6px}
   .kpi{justify-self:start}
-  .dt-gallery{grid-template-columns:1fr 1fr}
+  .dt-gallery{grid-template-columns:1fr}
+  .dt-gallery figure:last-child:nth-child(odd){grid-column:span 1}
 }
 
 /* ---------- 抽牌：带一点回弹，才像被抽出来 ---------- */
