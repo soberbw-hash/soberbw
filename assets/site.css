@@ -521,28 +521,33 @@ body.dark{background:#0B0F12}
   position:absolute;left:clamp(20px,11vw,196px);top:clamp(84px,15.5vh,160px);z-index:6;
   max-width:min(92vw,860px);
 }
-/* 名字用思源宋 Black。只子集了「尤博文」三个字，1.4KB——
+/* 名字用手写行书（志莽行书）。只子集了「尤博文」三个字，1.6KB——
    中文展示字体动辄十几兆，但这里只排三个字，没必要把整副字库搬上来。
-   宋体的横细竖粗和三角衬角，比黑体更像「写出来的」，不是排版软件默认值。 */
+
+   为什么不是宋体/黑体：印刷体的横平竖直就是「规矩」本身，怎么调字距都还是排版软件
+   的默认值。行书三个字天然大小错落、重心不齐，「不正」是字形自带的，不是扭出来的。
+   代价是「博」写得比较草——但整句在上下文里仍能读出来，这个交换划算。
+
+   行书只有 400 一个字重，绝不能让它被合成加粗：伪粗体会把飞白和连笔糊死，
+   所以显式写 font-weight:400 + font-synthesis:none。 */
 @font-face{
-  font-family:'Site Serif';
-  src:url('../fonts/display/serif-name-900.woff2') format('woff2');
-  font-weight:900;font-style:normal;font-display:swap;
+  font-family:'Site Brush';
+  src:url('../fonts/display/brush-name.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
 }
-/* 「不用这么正」落在三处，都不靠扭字形：
-   1. 收紧字距 -.045em —— 宋体 Black 笔画粗，松排是三个独立的字，收紧才咬成一块墨；
-   2. 左缘负 -.03em 做视觉对齐 —— 「尤」的左撇会探出字面框，不补这一下左边缘是虚的；
-   3. 三层贴近的暗边 —— 横画细，背后又是视频亮部，只给一层大柔光会被吃掉。 */
 .sc-hero h1{
-  font-family:'Site Serif','Noto Serif SC','Songti SC',serif;
-  font-size:clamp(66px,11.8vw,208px);
-  font-weight:900;line-height:1.02;
-  letter-spacing:-.045em;margin-left:-.03em;
+  font-family:'Site Brush','Ma Shan Zheng','Noto Serif SC','Songti SC',serif;
+  font-size:clamp(78px,13.9vw,268px);
+  font-weight:400;font-synthesis:none;
+  line-height:1.04;
+  /* 行书自带字距和重心，收紧会撞、放开会散，给一点呼吸就够；
+     左缘负 .04em 是补「尤」那一撇的拖尾，不补左边缘就和正文对不齐 */
+  letter-spacing:.012em;margin-left:-.04em;
   color:#FAFAF7;
   text-shadow:
-    0 1px 0 rgba(8,11,14,.30),
-    0 2px 10px rgba(8,11,14,.34),
-    0 14px 48px rgba(8,11,14,.36);
+    0 1px 0 rgba(8,11,14,.26),
+    0 2px 12px rgba(8,11,14,.32),
+    0 16px 52px rgba(8,11,14,.34);
 }
 
 /* ---------- 标题悬停：一层跟着光标走的柔光，把字里的金绿渐变擦出来 ----------
@@ -574,7 +579,7 @@ body.dark{background:#0B0F12}
    字号差三倍是故意的——签名是「人」的痕迹，标签只是分类。 */
 .sc-en{
   display:flex;align-items:baseline;gap:clamp(12px,1.8vw,26px);
-  margin-top:clamp(4px,.9vh,14px);margin-left:-.03em;
+  margin-top:clamp(4px,.9vh,14px);
 }
 .sc-en .en{
   font-size:clamp(9.5px,.8vw,11.5px);
@@ -604,8 +609,9 @@ body.dark{background:#0B0F12}
 
 /* ---------- 底部卡片带：圆柱内壁弧形（几何全部由 JS 逐帧计算） ---------- */
 .sc-rail{
-  position:absolute;left:0;right:0;bottom:clamp(8px,1.4vh,20px);z-index:7;
-  height:clamp(300px,41vh,450px);
+  position:absolute;left:0;right:0;bottom:clamp(10px,1.6vh,24px);z-index:7;
+  /* 比上一版收了一成半：整屏元素本来就多，卡片带再满，正文就没气了 */
+  height:clamp(258px,35vh,386px);
   overflow:hidden;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 2.6%,#000 97.4%,transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,#000 2.6%,#000 97.4%,transparent 100%);
@@ -647,8 +653,8 @@ body.dark{background:#0B0F12}
     inset 0 0 0 1px rgba(255,255,255,.13),
     0 8px 22px -6px rgba(0,0,0,.45);
 }
-.sc-card .cap b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:500;font-size:12px;line-height:1.4;letter-spacing:.01em}
-.sc-card .cap i{display:block;font-style:normal;font-size:9.5px;color:rgba(242,240,234,.58);margin-top:3px}
+.sc-card .cap b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:500;font-size:11.5px;line-height:1.4;letter-spacing:.01em}
+.sc-card .cap i{display:block;font-style:normal;font-size:9px;color:rgba(242,240,234,.58);margin-top:2px}
 
 
 /* ---------- 入场 ---------- */
@@ -675,14 +681,14 @@ body.dark{background:#0B0F12}
   .sc-links{gap:13px;font-size:12.5px}
   .sc-pill{height:34px;padding:0 14px;font-size:12px;letter-spacing:.1em}
   .sc-hero{left:20px;right:20px;top:clamp(92px,19vh,160px);max-width:none}
-  .sc-hero h1{font-size:clamp(86px,22vw,140px)}
-  .sc-en{gap:clamp(11px,3vw,18px);margin-left:-.03em;margin-top:12px}
+  .sc-hero h1{font-size:clamp(96px,25vw,168px);line-height:1.06}
+  .sc-en{gap:clamp(11px,3vw,18px);margin-top:20px}
   .sc-en .en{font-size:clamp(10px,2.6vw,11.5px);letter-spacing:.4em;margin-right:-.4em}
   .sc-en .sig{font-size:clamp(19px,5vw,28px)}
   .sc-sub{font-size:13px;line-height:1.7;max-width:100%;margin-top:clamp(12px,2vh,26px)}
-  .sc-rail{height:clamp(210px,31vh,300px);bottom:clamp(26px,4.2vh,44px)}
+  .sc-rail{height:clamp(186px,27vh,262px);bottom:clamp(22px,3.6vh,38px)}
   .sc-card .cap{left:9px;right:9px;bottom:10px}
-  .sc-card .cap b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sc-card .cap b{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sc-card .cap i{display:none}
   /* 竖屏没地方放岛，取右侧云层当暖色氛围，别让草地糊在正文后面 */
   .sc-film{
