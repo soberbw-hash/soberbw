@@ -9,7 +9,9 @@
   --ink-l2:#A5A196;
   --ink-d:#141412;
   --ink-d2:#5B5B55;
-  --ink-d3:#8E8D84;
+  --ink-d3:#74736B;   /* 原 #8E8D84：在 #F5F4F0 上对比只有 2.9:1，
+                         10.5–12px 的小字（日期、图注、字段名）实际很难读。
+                         压到 4.3:1 仍明显轻于 --ink-d2，层级没丢。 */
   --rule-d:#DCDAD2;
   --rule-l:#26251F;
   --gold:#C8B48A;
@@ -277,8 +279,16 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
   .timeline .row{padding:16px 0}
 }
 
-/* 二级页浅色顶栏 */
-body.inner .topbar{background:rgba(245,244,240,.88);border-bottom:1px solid var(--rule-d)}
+/* 二级页浅色顶栏。
+   0.88 的米白底下会透出正文的暗字，滚过去时顶栏里浮着一层能认出来的字，
+   像没擦干净的玻璃。加厚到 0.94 再把模糊拉大，透出来的只剩一片色温，
+   不再是字——磨砂该有的样子。 */
+body.inner .topbar{
+  background:rgba(245,244,240,.94);
+  -webkit-backdrop-filter:blur(22px) saturate(1.15);
+  backdrop-filter:blur(22px) saturate(1.15);
+  border-bottom:1px solid var(--rule-d);
+}
 /* 内容短的二级页把页脚压到底部，别让它悬在半空 */
 body.inner{display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
 body.inner>main{flex:1 0 auto}
@@ -529,6 +539,19 @@ body.dark{background:#0B0F12}
   display:flex;flex-direction:column;justify-content:center;
 }
 .sc-hero-in{max-width:min(100%,780px)}
+/* 文字背后单独压一小片暗场。
+   全局那层 .sc-veil 是从左往右淡出的（0.62 → 62% 处归零），到正文右端只剩
+   一成多一点——片子里那块亮雾一飘过来，后半行白字就只剩 3:1 左右，读得很吃力。
+   这里按「正文实际占的那块」再补一层径向压暗：只补字后面，不碰右边的片带，
+   也不把整张画面压灰。z-index:-1 落在 .sc-hero 自己的层叠上下文里，
+   所以它在全局遮罩之上、文字之下。 */
+.sc-hero::before{
+  content:"";
+  position:absolute;z-index:-1;pointer-events:none;
+  left:-6%;right:-6%;top:18%;bottom:8%;
+  background:radial-gradient(56% 50% at 32% 56%,
+    rgba(7,10,13,.50) 0%,rgba(7,10,13,.25) 52%,rgba(7,10,13,0) 76%);
+}
 /* 名字上面压一行极小的小字：先说「我是干什么的」，再让名字出场。
    前面拖一根 1px 的绿线，把这一行和左边的留白接起来。 */
 .sc-kicker{
@@ -692,7 +715,7 @@ body.dark{background:#0B0F12}
 .sc-foot{
   position:absolute;z-index:6;
   left:clamp(20px,8vw,150px);bottom:clamp(16px,2.8vh,30px);
-  font-size:10.5px;letter-spacing:.16em;color:rgba(250,250,247,.42);
+  font-size:10.5px;letter-spacing:.16em;color:rgba(250,250,247,.52);
 }
 
 
@@ -1037,11 +1060,19 @@ body.dt-page>main{width:100%;padding-top:0}
 /* ---- 工作经历：左侧切换，右侧详情（纯 CSS radio tab） ---- */
 .exp{
   position:relative;
-  display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.65fr);
+  display:grid;grid-template-columns:minmax(0,.66fr) minmax(0,1.6fr);
   gap:clamp(20px,4vw,64px);align-items:start;
 }
 .exp>input{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
-.exp-list{display:grid;gap:2px;border-left:1px solid var(--rule-d);padding-left:0}
+/* 左栏钉住：右边那栏动辄六七百像素高，读到一半想换一段经历，
+   标签已经滚没了。sticky 让它跟着停在顶栏下面，随时能点。
+   top 要避开 fixed 顶栏（64px）+ 一点呼吸。 */
+.exp-list{
+  display:grid;gap:2px;
+  border-left:1px solid var(--rule-d);padding-left:0;
+  position:sticky;top:clamp(80px,10vh,100px);
+  align-self:start;
+}
 .exp-list label{
   display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;
   padding:13px 14px;cursor:pointer;
@@ -1077,11 +1108,17 @@ body.dt-page>main{width:100%;padding-top:0}
 }
 
 .exp-panes{min-width:0}
-.exp-pane{display:none;animation:paneIn .45s var(--ease) both}
+.exp-pane{display:none}
 #exp-0:checked~.exp-panes .exp-pane:nth-child(1),
 #exp-1:checked~.exp-panes .exp-pane:nth-child(2),
 #exp-2:checked~.exp-panes .exp-pane:nth-child(3){display:block}
-@keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* 切换时不要整块一起淡进来——那块内容一次出现，视线没有落点。
+   标题、副行、正文分三拍依次落位，慢半拍的那两拍反而让人觉得「翻页了」。
+   display:none → block 会重启动画，所以每次点标签都会重新播。 */
+.exp-pane>*{animation:paneIn .52s var(--ease) both}
+.exp-pane>*:nth-child(2){animation-delay:.05s}
+.exp-pane>*:nth-child(3){animation-delay:.11s}
+@keyframes paneIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 
 .exp-pane h3{font-weight:600;font-size:clamp(18px,1.6vw,24px);line-height:1.3;letter-spacing:-.01em}
 .exp-pane-meta{margin-top:6px;font-size:12px;color:var(--ink-d3);letter-spacing:.02em}
@@ -1095,14 +1132,17 @@ body.dt-page>main{width:100%;padding-top:0}
 .ticks li::before{
   content:"";position:absolute;left:2px;top:.52em;
   width:9px;height:5px;
-  border-left:1.6px solid var(--gold);border-bottom:1.6px solid var(--gold);
+  /* 金色 #C8B48A 当装饰很好，当「勾」太淡——1.6px 的浅金在米白上几乎看不见，
+     这条列表就丢了列表感。勾换成深一档的金，线也加粗到 2px。 */
+  border-left:2px solid #9C8455;border-bottom:2px solid #9C8455;
   transform:rotate(-45deg);
 }
 .ticks b{display:block;font-weight:500;font-size:13.5px;line-height:1.5;margin-bottom:3px}
 .ticks p{font-size:13px;line-height:1.85;color:#4A4941}
 .kpi{
   font-size:11.5px;color:var(--ink-d);white-space:nowrap;
-  background:#EAE8E0;border-radius:999px;padding:4px 11px;
+  background:#E9E6DB;border-radius:999px;padding:4px 11px;
+  box-shadow:inset 0 0 0 1px rgba(20,20,18,.045);
   font-variant-numeric:tabular-nums;align-self:start;
   letter-spacing:.01em;
 }
@@ -1436,8 +1476,12 @@ body.inner .contact-page .sec-head{margin-bottom:clamp(28px,4.4vh,48px)}
    简历那一屏内容比视口高，mandatory 会把人死死按在屏顶，滚不到中间。 */
 html.snap{
   scroll-snap-type:y proximity;
-  /* 顶栏是 fixed 的，吸附点要让开它，否则每屏标题都被压在栏下面 */
-  scroll-padding-top:clamp(64px,9vh,84px);
+  /* 这里必须是 0，不能再让开一次顶栏。
+     每屏自己有一段 padding-top（见 .bz-pane），那一段的作用就是让开 fixed 顶栏；
+     如果这里再写 64–84px，两者会相加：从导航点进「简历」时，标题会被推到
+     离顶栏 189px 的地方，而直接滚到同一屏时只有 108px——同一个位置两种间距。
+     让 padding-top 一个人负责，两条路径就对齐了。 */
+  scroll-padding-top:0;
 }
 
 .bz{position:relative}
@@ -1456,19 +1500,32 @@ html.snap{
   padding-top:clamp(84px,12vh,136px);
   padding-bottom:clamp(48px,8vh,100px);
   scroll-snap-align:start;
-  /* 进入视口的过程中浮现并轻轻抬起来。--vis 是 0→1 的进入程度，
-     由 scroll.js 每帧写进来——所以是「跟着滚动慢慢变」，不是一次性触发。
+  /* 进入视口的过程中浮现。--vis 是 0→1 的进入程度，由 scroll.js 每帧写进来，
+     所以是「跟着滚动慢慢变」，不是一次性触发。
      透明度不从 0 起：这些屏动辄两三千像素高，从全透明开始的话，
-     屏顶刚进视口那一段会是一片空底色，看着像卡住了。留 35% 起步就没有这个断层。 */
+     屏顶刚进视口那一段会是一片空底色，看着像卡住了。留 35% 起步就没有这个断层。
+     位移不放在这里，见下面 .bz-pane>.wrap —— 原因也写在那儿。 */
   opacity:calc(.35 + var(--vis,1) * .65);
-  transform:translate3d(0,calc((1 - var(--vis,1)) * 34px),0);
 }
 
 /* 老浏览器不认 safe 时的兜底：内容超一屏就顶对齐（由 scroll.js 打上这个类） */
 .bz-pane.is-tall{justify-content:flex-start}
 
-/* 内层容器原来的上下内边距由 section 接管，不然两处相加会顶出一大截空白 */
-.bz-pane>.wrap{padding-top:0;padding-bottom:0}
+/* 内层容器原来的上下内边距由 section 接管，不然两处相加会顶出一大截空白。
+   width:100% 不能省：.bz-pane 是 flex 容器，.wrap 带着 margin:0 auto 就成了
+   flex 子项，auto 外边距会把它的宽度退化成 shrink-to-fit——内容长的屏（作品、
+   简历、软件）刚好被撑满看不出来，内容短的联系屏只有 1052px，整块内容比别的屏
+   右移 194px，滚过去就是一次横向错位。
+
+   位移为什么放在 wrap 上而不是 .bz-pane 上：scroll-snap 的吸附区是按元素
+   「带变换后的边框盒」算的。位移写在 section 上，section 的吸附点就跟着
+   --vis 一起飘，最多差 34px——于是点导航和手动滚到同一屏会落在两个不同的
+   位置（实测 2418 和 2452 都出现过），标题离顶栏的距离忽远忽近。
+   放在 wrap 上，section 的盒子纹丝不动，吸附点和 goTo() 算出来的目标就都准了。 */
+.bz-pane>.wrap{
+  width:100%;padding-top:0;padding-bottom:0;
+  transform:translate3d(0,calc((1 - var(--vis,1)) * 34px),0);
+}
 
 /* 每屏一层极淡的暖光，位置随进入程度往上走一点。
    四屏都是米白，靠色块区分会很脏；靠这种几乎看不见的光感反而连得上。 */
@@ -1503,35 +1560,64 @@ body.inner .bz-pane .contact-page{
 
 /* ---------- 右侧进度：四个点，当前那个亮起来 ----------
    点贴到屏幕最边上，标签平时收起来、鼠标移上去才出来——
-   常显会压在作品图和简历的右栏上，很碍事。 */
+   常显会压在作品图和简历的右栏上，很碍事。
+   整组外面套一层「只在移上去时才出现」的磨砂胶囊：平时它只是四个小点，
+   鼠标进来才知道这里能点。原来 5px、34% 不透明度，在米白底上就是几个脏点，
+   既不像控件也不像装饰。
+
+   标签必须绝对定位。它原来只是 opacity:0，仍占着文档流里的宽度——四个标签里
+   最宽的那个（「01 作品」约 48px）把整列点往左顶，点就落在了正文右缘里面，
+   在联系屏上正好压在第三张卡片边上。脱离文档流之后，这一列只有点本身那么宽。 */
 .bz-dots{
-  position:fixed;right:clamp(4px,.7vw,10px);top:50%;
+  position:fixed;right:clamp(6px,1vw,16px);top:50%;
   transform:translateY(-50%);
   z-index:90;
-  display:flex;flex-direction:column;gap:2px;
-  padding:6px 0;
+  display:flex;flex-direction:column;gap:0;
+  padding:9px 6px;
+  border-radius:999px;
+  transition:background .45s var(--ease),box-shadow .45s var(--ease);
+}
+.bz-dots:hover{
+  background:rgba(248,247,243,.82);
+  box-shadow:0 10px 34px -22px rgba(20,20,18,.55),0 0 0 1px rgba(220,218,210,.7);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
 }
 .bz-dots a{
-  display:flex;align-items:center;justify-content:flex-end;gap:9px;
-  padding:7px 8px;
-  font-size:10.5px;letter-spacing:.14em;color:var(--ink-d3);
+  position:relative;
+  display:flex;align-items:center;justify-content:flex-end;
+  padding:7px 6px;
+  font-size:10.5px;letter-spacing:.14em;color:var(--ink-d2);
   transition:color .35s var(--ease);
 }
 .bz-dots a i{
   flex:0 0 auto;
-  width:5px;height:5px;border-radius:50%;
-  background:currentColor;opacity:.34;
-  transition:opacity .4s var(--ease),transform .4s var(--ease),background .4s var(--ease);
+  width:6px;height:6px;border-radius:50%;
+  background:currentColor;opacity:.42;
+  transition:opacity .4s var(--ease),transform .4s var(--ease),background .4s var(--ease),box-shadow .4s var(--ease);
 }
+/* 标签从点的左边滑出来。自带一小片米白底，滑到正文上也还读得清。 */
 .bz-dots a span{
-  opacity:0;transform:translateX(7px);
+  position:absolute;right:calc(100% + 4px);top:50%;
+  padding:3px 9px;border-radius:999px;
+  background:rgba(248,247,243,.92);
+  box-shadow:0 4px 16px -10px rgba(20,20,18,.45);
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transform:translate(7px,-50%);
   transition:opacity .32s var(--ease),transform .32s var(--ease);
-  white-space:nowrap;
 }
-.bz-dots a:hover{color:var(--ink-d2)}
-.bz-dots a:hover span{opacity:1;transform:none}
+.bz-dots a:hover{color:var(--ink-d)}
+.bz-dots a:hover i{opacity:.9}
+.bz-dots a:hover span{opacity:1;transform:translate(0,-50%)}
 .bz-dots a.on{color:var(--ink-d)}
-.bz-dots a.on i{opacity:1;transform:scale(1.7);background:var(--gold)}
+/* 当前那个：金色实心，外面一圈很淡的金晕。晕用 box-shadow 而不是伪元素，
+   它跟着 i 的 scale 一起变，不用另算尺寸。
+   晕的扩散半径要小：0 模糊 + 大扩散会变成一块实心色饼，比 6px 的点大四倍，
+   看着像贴了张标签。2px 扩散、16% 不透明度，才只是「描了一圈」。 */
+.bz-dots a.on i{
+  opacity:1;transform:scale(1.35);background:var(--gold);
+  box-shadow:0 0 0 2px rgba(200,180,138,.16);
+}
+.bz-dots:hover a.on i{box-shadow:0 0 0 3px rgba(200,180,138,.2)}
 
 /* 顶栏导航：滚动到哪一屏，对应那一项就亮。
    原来 aria-current 是构建时写死的，滚动页里由脚本改写。 */
@@ -1542,7 +1628,9 @@ body.bz-page .topbar nav a[aria-current]{color:var(--ink-d);border-color:var(--g
    （这条要压过 @media 里那条 .topbar{position:static}，所以带上 body.bz-page。） */
 body.bz-page .topbar{
   position:fixed;
-  background:rgba(245,244,240,.9);
+  background:rgba(245,244,240,.94);
+  -webkit-backdrop-filter:blur(22px) saturate(1.15);
+  backdrop-filter:blur(22px) saturate(1.15);
   border-bottom:1px solid var(--rule-d);
 }
 /* 顶栏底下一条极细的金线，长度就是整页的滚动进度。
@@ -1555,20 +1643,30 @@ body.bz-page .topbar::after{
   transform-origin:0 50%;
 }
 
-/* 窄屏：进度点挪到底部，横着排，别挡正文 */
+/* 窄屏：进度点挪到底部，横着排，别挡正文。
+   必须常显一层磨砂底：它是 fixed 的，底下滚过什么都有可能，而手机上的正文是
+   满宽的单列——不加底的时候，四个点正好落在图注那一行上，像纸上的脏点。 */
 @media (max-width:760px){
   .bz-dots{
-    right:auto;left:50%;top:auto;bottom:14px;
+    right:auto;left:50%;top:auto;bottom:12px;
     transform:translateX(-50%);
-    flex-direction:row;gap:14px;
+    flex-direction:row;gap:8px;
+    padding:7px 13px;
+    background:rgba(248,247,243,.86);
+    box-shadow:0 8px 26px -18px rgba(20,20,18,.55),0 0 0 1px rgba(220,218,210,.75);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   }
   .bz-dots a span{display:none}
-  .bz-dots a{padding:6px}
+  .bz-dots a{padding:6px 5px}
   .bz-pane{padding-top:clamp(72px,10vh,104px);padding-bottom:clamp(52px,8vh,72px)}
 }
 
 /* 关掉动效时不要位移，只保留可见 */
 @media (prefers-reduced-motion:reduce){
   html.snap{scroll-snap-type:none}
-  .bz-pane{transform:none;opacity:1}
+  .bz-pane{opacity:1}
+  .bz-pane>.wrap{transform:none}
+  /* 标签页的分拍入场也要停：只留淡入，不然「减少动态」形同虚设 */
+  .exp-pane>*{animation-duration:.01s;animation-delay:0s}
+  .exp-pane>*{transform:none}
 }
