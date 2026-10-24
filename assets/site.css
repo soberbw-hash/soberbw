@@ -289,3 +289,17 @@ body.inner .topbar nav{color:var(--ink-d2)}
 body.inner .topbar nav a:hover,body.inner .topbar nav a[aria-current]{color:var(--ink-d);border-color:var(--accent)}
 /* 时间线列宽 */
 .timeline .row{grid-template-columns:clamp(96px,11vw,144px) minmax(0,.85fr) minmax(0,1.45fr)}
+
+/* ============ 无障碍与降级 ============ */
+/* 键盘用户看得见焦点，鼠标用户不受打扰 */
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+body:not(.inner) :focus-visible{outline-color:var(--gold)}
+::selection{background:var(--gold);color:#0A0A09}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+  .frame svg{transition:none}
+  .work:hover .frame svg{transform:none}
+}
+/* 时间线最后一行的下边框会和下一块的顶边框叠成两条线，去掉一条 */
+.timeline .row:last-child{border-bottom:0}
