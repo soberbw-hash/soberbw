@@ -47,7 +47,9 @@
     var target = { mx: 0, my: 0 }, now = { mx: 0, my: 0 };
 
     function build() {
-      dpr = Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2);
+      // 云本身就是一团糊的东西，dpr 给到 2 是纯浪费：整块画布要按 2880×1800 填，
+      // 每帧二十多张大图的 alpha 混合，全在和滚动/片带抢同一块 GPU。1.5 看不出来。
+      dpr = Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.5);
       W = canvas.clientWidth;
       H = canvas.clientHeight;
       canvas.width = Math.round(W * dpr);
@@ -88,11 +90,18 @@
     }
 
     var last = performance.now();
-    function frame(t) {
+    function frame(t, once) {
+      /* 云层的漂移速度是 2–13 px/s。60fps 下每帧只挪 0.03–0.2 像素——
+         这个量级上 30fps 和 60fps 的观感完全一样，但成本差一倍：
+         每帧要 clearRect 一整块画布、再画二十多张 660×330 的大图（带 alpha 混合）。
+         这笔开销和片带、和滚动抢的是同一块 GPU，所以按 30fps 出图。 */
+      if (!once && t - last < 30) { requestAnimationFrame(frame); return; }
       var dt = Math.min((t - last) / 1000, 0.05);
       last = t;
-      now.mx += (target.mx - now.mx) * 0.06;
-      now.my += (target.my - now.my) * 0.06;
+      // 视差跟随按秒收敛，不按帧数——改成 30fps 之后原来那个 0.06/帧 会慢一半
+      var k = Math.min(1, dt * 3.6);
+      now.mx += (target.mx - now.mx) * k;
+      now.my += (target.my - now.my) * k;
       ctx.clearRect(0, 0, W, H);
 
       for (var i = 0; i < layers.length; i++) {
@@ -118,14 +127,20 @@
         }
       }
       ctx.globalAlpha = 1;
-      requestAnimationFrame(frame);
+      if (!once) requestAnimationFrame(frame);
     }
 
     build();
-    requestAnimationFrame(frame);
+    if (reduce) {
+      // 减少动态：云不漂也不跟鼠标，画一帧定住就够，别再排队占帧
+      frame(performance.now(), true);
+    } else {
+      requestAnimationFrame(frame);
+    }
 
     addEventListener('resize', build);
     addEventListener('pointermove', function (e) {
+      if (reduce) return;
       var r = canvas.getBoundingClientRect();
       target.mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
       target.my = ((e.clientY - r.top) / r.height - 0.5) * 2;
@@ -148,22 +163,32 @@
     });
     if (reduce) return;
 
-    var mx = 0, my = 0, tx = 0, ty = 0;
+    var mx = 0, my = 0, tx = 0, ty = 0, raf = 0;
     addEventListener('pointermove', function (e) {
       mx = (e.clientX / innerWidth - 0.5) * 2;
       my = (e.clientY / innerHeight - 0.5) * 2;
+      if (!raf) raf = requestAnimationFrame(loop);
     }, { passive: true });
-    addEventListener('pointerleave', function () { mx = 0; my = 0; });
+    addEventListener('pointerleave', function () {
+      mx = 0; my = 0;
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
 
-    (function loop() {
+    /* 收敛之后就停。
+       原来这个循环是常开的：鼠标不动的时候，它每秒 60 次算出完全一样的
+       transform 再写回去，每次都触发一次样式重算——纯空转。
+       现在一是只在值真变了才写，二是追上了就不再排队，等下一次 pointermove 再醒。 */
+    function loop() {
       tx += (mx - tx) * 0.07;
       ty += (my - ty) * 0.07;
       for (var i = 0; i < els.length; i++) {
         var k = parseFloat(els[i].getAttribute('data-tilt')) || 0;
-        els[i].style.transform = 'translate3d(' + (tx * k).toFixed(2) + 'px,' + (ty * k).toFixed(2) + 'px,0)';
+        var tf = 'translate3d(' + (tx * k).toFixed(2) + 'px,' + (ty * k).toFixed(2) + 'px,0)';
+        if (els[i].__tf !== tf) { els[i].style.transform = tf; els[i].__tf = tf; }
       }
-      requestAnimationFrame(loop);
-    })();
+      raf = (Math.abs(mx - tx) > 0.0006 || Math.abs(my - ty) > 0.0006)
+        ? requestAnimationFrame(loop) : 0;
+    }
   }
 
   /* ---------------- 右侧片带：一列 2:1 画面匀速上移 ----------------
@@ -178,7 +203,8 @@
     var originals = [].slice.call(track.children);
     if (!originals.length) return;
 
-    var W = 0, H = 0, cardW = 0, cardH = 0, pitch = 0, setH = 0, padL = 0;
+    var W = 0, H = 0, cardW = 0, cardH = 0, pitch = 0, setH = 0, padL = 0, leftBase = 0;
+    var cards = [];
     var GAP = 0.085;     // 间距 / 卡高
     var SHRINK = 0.055;  // 最边上缩多少：越靠边越小，像往远处退
 
@@ -196,6 +222,21 @@
       cardW = Math.min(W, H * 0.95);
       cardH = cardW / 2;
       pitch = cardH * (1 + GAP);
+      leftBase = padL + (W - cardW) / 2;
+      sizeCards();
+    }
+
+    /* 宽高只在尺寸真的变了的时候写一次。
+       这几张卡的 width/height 在整个生命周期里是常量，但上一版把它们放在逐帧循环里写，
+       等于每帧让浏览器给每张卡重排一次。位置改由 transform 的 translate 承担之后，
+       逐帧就只剩一个合成器属性了。 */
+    function sizeCards() {
+      var w = cardW.toFixed(1) + 'px', h = cardH.toFixed(1) + 'px';
+      for (var i = 0; i < cards.length; i++) {
+        var s = cards[i].style;
+        s.width = w; s.height = h;
+        s.left = '0px'; s.top = '0px';
+      }
     }
 
     measure();
@@ -211,6 +252,7 @@
     }
     var cards = [].slice.call(track.children);
     setH = pitch * cards.length;
+    sizeCards();
 
     // 光标压住的那张放大一点。倍率写在脚本里，因为 transform 每帧都要重写，
     // 写在 CSS 的 :hover 里会被行内样式盖掉。
@@ -276,7 +318,7 @@
       }
 
       var cy = H / 2, reach = H / 2 + cardH / 2;
-      var leftX = padL + (W - cardW) / 2;
+      var leftX = leftBase;
 
       for (var i = 0; i < cards.length; i++) {
         var el = cards[i];
@@ -284,24 +326,55 @@
         // 折回 [-setH/2, setH/2)，保证首尾接得上
         if (setH > 0) tt = ((tt + setH / 2) % setH + setH) % setH - setH / 2;
 
+        /* 抽牌：光标压住的那张抬起来、微微转一点。
+           这里用一个小弹簧自己算进度（hp 位置 / hv 速度），而不是交给 CSS 的
+           transition——transform 是逐帧写的，挂 transition 等于每帧重新起一次
+           动画，卡片永远追不上目标值，整条带子会显得发软。
+           ζ≈0.65，收尾时回弹一下，跟原来 .58s 那条曲线的观感一致。 */
+        var target = el === hoverEl ? 1 : 0;
+        var hp = el.__hp || 0, hv = el.__hv || 0;
+        if (hp || hv || target) {
+          hv += (target - hp) * 190 * dt - hv * 18 * dt;
+          hp += hv * dt;
+          if (!target && hp < 0.001 && Math.abs(hv) < 0.01) { hp = 0; hv = 0; }
+          el.__hp = hp; el.__hv = hv;
+        }
+
         var ad = Math.abs(tt) / reach;
         // 视口外就整张停写
-        if (ad > 1.2) { el.style.visibility = 'hidden'; continue; }
-        el.style.visibility = 'visible';
+        if (ad > 1.2) {
+          if (el.__vis !== false) { el.style.visibility = 'hidden'; el.__vis = false; }
+          continue;
+        }
+        if (el.__vis !== true) { el.style.visibility = 'visible'; el.__vis = true; }
 
         var d = ad > 1 ? 1 : ad;
         var s = 1 - SHRINK * d * d;
-        if (el === hoverEl) s *= 1.035;
+        s *= 1 + 0.075 * hp;
 
-        el.style.left = leftX.toFixed(1) + 'px';
-        el.style.top = (cy + tt - cardH / 2).toFixed(1) + 'px';
-        el.style.width = cardW.toFixed(1) + 'px';
-        el.style.height = cardH.toFixed(1) + 'px';
-        el.style.transform = s === 1 ? 'none' : 'scale(' + s.toFixed(4) + ')';
+        /* 每帧只写 transform 一个属性。
+           原来这里还写 left / top / width / height —— 那四个都是布局属性，
+           一张卡一次就够浏览器重排一遍，一屏七八张就是七八次。
+           现在位置改由 translate3d 承担，宽高在 measure() 里一次写好，
+           逐帧只剩一个合成器属性，不触发布局也不触发绘制。
 
-        // 靠上下两端的卡字幕淡出，中间那张才是「当前这张」
+           另外比一下字符串：鼠标停在带子上、或者开了「减少动态」时，offset 不动，
+           每帧算出来的 transform 是一模一样的。写同样的值浏览器照样要重算样式，
+           所以只在真的变了的时候写。 */
+        var tf = 'translate3d(' + leftX.toFixed(1) + 'px,' +
+          (cy + tt - cardH / 2 - 26 * hp).toFixed(1) + 'px,0)' +
+          (hp > 0.001 ? ' rotate(' + (-1.3 * hp).toFixed(3) + 'deg)' : '') +
+          ' scale(' + s.toFixed(4) + ')';
+        if (el.__tf !== tf) { el.style.transform = tf; el.__tf = tf; }
+
+        // 靠上下两端的卡字幕淡出，中间那张才是「当前这张」。
+        // 按 0.04 一档量化：原来每帧都写，屏幕边缘那几张其实一直卡在 0 和 1 之间抖。
         var cap = el.querySelector('.cap');
-        if (cap) cap.style.opacity = d < 0.5 ? '1' : (d > 0.9 ? '0' : ((0.9 - d) / 0.4).toFixed(2));
+        if (cap) {
+          var op = d < 0.5 ? 1 : (d > 0.9 ? 0 : (0.9 - d) / 0.4);
+          var q = Math.round(op * 25) / 25;
+          if (cap.__op !== q) { cap.style.opacity = q; cap.__op = q; }
+        }
       }
       requestAnimationFrame(loop);
     })(performance.now());
@@ -342,12 +415,16 @@
     if (!lit) return;
 
     var tx = 0, ty = 0, cx = 0, cy = 0, raf = 0, active = false;
+    var lastX = '', lastY = '';
 
     function frame() {
       cx += (tx - cx) * 0.2;
       cy += (ty - cy) * 0.2;
-      lit.style.setProperty('--sc-mx', cx.toFixed(1) + 'px');
-      lit.style.setProperty('--sc-my', cy.toFixed(1) + 'px');
+      // 光标停住之后这两个值会收敛到同一串字符，就别再写了——
+      // 写 --sc-mx 会让这个元素的遮罩重算一次，鼠标悬着不动也在烧
+      var sx = cx.toFixed(1) + 'px', sy = cy.toFixed(1) + 'px';
+      if (sx !== lastX) { lit.style.setProperty('--sc-mx', sx); lastX = sx; }
+      if (sy !== lastY) { lit.style.setProperty('--sc-my', sy); lastY = sy; }
       if (active || Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) {
         raf = requestAnimationFrame(frame);
       } else {

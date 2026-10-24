@@ -285,8 +285,8 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
    不再是字——磨砂该有的样子。 */
 body.inner .topbar{
   background:rgba(245,244,240,.94);
-  -webkit-backdrop-filter:blur(22px) saturate(1.15);
-  backdrop-filter:blur(22px) saturate(1.15);
+  -webkit-backdrop-filter:blur(10px) saturate(1.15);
+  backdrop-filter:blur(10px) saturate(1.15);
   border-bottom:1px solid var(--rule-d);
 }
 /* 内容短的二级页把页脚压到底部，别让它悬在半空 */
@@ -1428,14 +1428,16 @@ body.dt-page>main{width:100%;padding-top:0}
   .dt-gallery figure:last-child:nth-child(odd){grid-column:span 1}
 }
 
-/* ---------- 抽牌：带一点回弹，才像被抽出来 ---------- */
+/* ---------- 抽牌：带一点回弹，才像被抽出来 ----------
+   这里原来挂着 `transition:transform .58s cubic-bezier(.34,1.5,.56,1)`。
+   但卡片的位置是脚本每帧用 transform 写的——于是每一帧的新值都会重新起一次
+   0.58 秒的弹性动画，卡片永远追不上目标位置，整条带子看起来「软、糊、掉帧」。
+   （同时 `.sc-card:hover{transform:...}` 也是死的：行内样式优先级更高。）
+
+   现在 transform 完全交给脚本：抬升、旋转、放大都在循环里按一个缓动的 hover
+   进度算（见 app.js 的 hp）。CSS 这边只保留不会和它打架的属性。 */
 .sc-card{
-  transition:transform .58s cubic-bezier(.34,1.5,.56,1),
-             box-shadow .58s cubic-bezier(.34,1.5,.56,1),
-             filter .4s ease !important;
-}
-.sc-card:hover{
-  transform:translateY(-26px) scale(1.075) rotate(-1.3deg);
+  transition:box-shadow .45s var(--ease),filter .4s ease;
 }
 .sc-card .art img{transition:transform .7s var(--ease)}
 .sc-card:hover .art img{transform:scale(1.06)}
@@ -1500,11 +1502,12 @@ html.snap{
   padding-top:clamp(84px,12vh,136px);
   padding-bottom:clamp(48px,8vh,100px);
   scroll-snap-align:start;
-  /* 进入视口的过程中浮现。--vis 是 0→1 的进入程度，由 scroll.js 每帧写进来，
-     所以是「跟着滚动慢慢变」，不是一次性触发。
-     透明度不从 0 起：这些屏动辄两三千像素高，从全透明开始的话，
-     屏顶刚进视口那一段会是一片空底色，看着像卡住了。留 35% 起步就没有这个断层。
-     位移不放在这里，见下面 .bz-pane>.wrap —— 原因也写在那儿。 */
+  /* 进入视口的过程中浮现。透明度不从 0 起：这些屏动辄两三千像素高，
+     从全透明开始的话，屏顶刚进视口那一段会是一片空底色，看着像卡住了。
+     留 35% 起步就没有这个断层。
+     位移不放在这里，见下面 .bz-pane>.wrap —— 原因也写在那儿。
+     --vis 这条只在浏览器不支持 scroll timeline 时才起作用（由 scroll.js 写）；
+     支持的时候下面 @supports 里的动画会盖掉它，而且动画跑在合成线程上。 */
   opacity:calc(.35 + var(--vis,1) * .65);
 }
 
@@ -1527,13 +1530,40 @@ html.snap{
   transform:translate3d(0,calc((1 - var(--vis,1)) * 34px),0);
 }
 
-/* 每屏一层极淡的暖光，位置随进入程度往上走一点。
-   四屏都是米白，靠色块区分会很脏；靠这种几乎看不见的光感反而连得上。 */
+/* 每屏一层极淡的暖光。四屏都是米白，靠色块区分会很脏；
+   靠这种几乎看不见的光感反而连得上。
+   位置原来是跟着 --vis 往上飘一点点的，现在固定了——那 14% 的位移肉眼看不出，
+   却让这个伪元素每帧都要重算一次渐变。 */
 .bz-pane::before{
   content:"";
   position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(58% 46% at 50% calc(26% - var(--vis,0) * 14%),
+  background:radial-gradient(58% 46% at 50% 26%,
     rgba(200,180,138,.11),rgba(200,180,138,0) 72%);
+}
+
+/* ---------- 进入动画交给合成器 ----------
+   以前是 scroll.js 每帧往 section 上写 --vis，透明度跟着变。问题是写自定义属性
+   会作废整棵子树的样式，而这几屏一屏就有几百个节点；再加上读几何和写样式交替，
+   每帧都被迫同步布局一次。实测滚动 120 帧要重算 158 次样式、122 次布局，
+   样式重算独占 0.66s（主线程总耗时 0.94s）。
+
+   换成 CSS 的滚动驱动动画之后，opacity 和 transform 由合成线程按滚动进度直接插值，
+   主线程一帧都不用醒。animation-range 的 entry 0%→55% 对应「元素顶边从视口底部
+   升到视口 45% 处」，跟原来 --vis 的区间一致。
+
+   为什么动画挂在 .wrap 上而不是 .bz-pane 上：scroll-snap 的吸附区按元素
+   「带变换后的边框盒」算，section 一旦有 transform，吸附点就会跟着动画飘
+   （点导航和手动滚到同一屏会落在两个位置，实测差 34px）。 */
+@supports (animation-timeline: view()) {
+  .bz-pane>.wrap{
+    animation:pane-enter linear both;
+    animation-timeline:view();
+    animation-range:entry 0% entry 55%;
+  }
+  @keyframes pane-enter{
+    from{opacity:.35;transform:translate3d(0,34px,0)}
+    to{opacity:1;transform:translate3d(0,0,0)}
+  }
 }
 
 /* 联系页原来在单独页面里靠 justify-content:center + min-height:100svh 撑满一屏，
@@ -1548,13 +1578,14 @@ body.inner .bz-pane .contact-page{
 }
 .bz-pane .contact-page .facts{margin-top:clamp(28px,5vh,56px)}
 
-/* 屏与屏之间一条极淡的分隔：它随上一屏滚出视口慢慢浮现，
-   给「换章节了」一个视觉信号，但不至于像一条硬分割线。 */
+/* 屏与屏之间一条极淡的分隔，给「换章节了」一个视觉信号。
+   原来透明度跟着 --vis 变；现在固定成 .55 —— 一条本来就极淡的线，
+   再让它渐显一遍，收益远不如省下的那次样式重算。 */
 .bz-pane + .bz-pane::after{
   content:"";
   position:absolute;left:var(--m);right:var(--m);top:0;height:1px;
   background:linear-gradient(90deg,transparent,var(--rule-d) 12%,var(--rule-d) 88%,transparent);
-  opacity:calc(var(--vis,0) * .9);
+  opacity:.55;
   pointer-events:none;
 }
 
@@ -1629,18 +1660,35 @@ body.bz-page .topbar nav a[aria-current]{color:var(--ink-d);border-color:var(--g
 body.bz-page .topbar{
   position:fixed;
   background:rgba(245,244,240,.94);
-  -webkit-backdrop-filter:blur(22px) saturate(1.15);
-  backdrop-filter:blur(22px) saturate(1.15);
+  -webkit-backdrop-filter:blur(10px) saturate(1.15);
+  backdrop-filter:blur(10px) saturate(1.15);
   border-bottom:1px solid var(--rule-d);
 }
 /* 顶栏底下一条极细的金线，长度就是整页的滚动进度。
-   长滚动页最难受的是「不知道还剩多少」，这条线给一个连续的答案。 */
+   长滚动页最难受的是「不知道还剩多少」，这条线给一个连续的答案。
+
+   用 transform:scaleX() 而不是 width：width 是布局属性，每帧改一次浏览器就要
+   重新排一次这一条线所在的盒子；scaleX 是合成器属性，改它不触发布局，
+   还能交给合成线程去插值。 */
 body.bz-page .topbar::after{
   content:"";
   position:absolute;left:0;bottom:-1px;height:1px;
-  width:calc(var(--prog,0) * 100%);
+  width:100%;
   background:var(--gold);
   transform-origin:0 50%;
+  transform:scaleX(var(--prog,0));
+}
+/* 支持滚动时间线的话，连 --prog 都不用写：进度由浏览器按滚动位置直接驱动，
+   全程零 JS、零样式重算。 */
+@supports (animation-timeline: scroll()) {
+  body.bz-page .topbar::after{
+    animation:bar-progress linear both;
+    animation-timeline:scroll(root block);
+  }
+  @keyframes bar-progress{
+    from{transform:scaleX(0)}
+    to{transform:scaleX(1)}
+  }
 }
 
 /* 窄屏：进度点挪到底部，横着排，别挡正文。
@@ -1665,8 +1713,32 @@ body.bz-page .topbar::after{
 @media (prefers-reduced-motion:reduce){
   html.snap{scroll-snap-type:none}
   .bz-pane{opacity:1}
-  .bz-pane>.wrap{transform:none}
+  /* animation:none 不能省：滚动驱动的入场动画会盖掉下面那条 transform:none，
+     不显式关掉的话，「减少动态」在这几屏上等于没生效。 */
+  .bz-pane>.wrap{animation:none;opacity:1;transform:none}
   /* 标签页的分拍入场也要停：只留淡入，不然「减少动态」形同虚设 */
   .exp-pane>*{animation-duration:.01s;animation-delay:0s}
   .exp-pane>*{transform:none}
+}
+
+/* ============================================================
+   页面之间的过渡
+   ============================================================ */
+/* 跨文档视图过渡：从作品详情返回列表、从首页点进任何一页，浏览器会在两次文档
+   之间做一次交叉淡入，而不是「白闪一下 → 新页直接出现」。
+   之前那一下白闪是整个站点里最不丝滑的地方——它不在动画里，它在动画之外。
+
+   只用 0.26s：过渡太长会变成「等页面」。慢的那一版里，返回列表要等半秒才看见
+   内容，比白闪还难受。 */
+@view-transition{navigation:auto}
+::view-transition-old(root),
+::view-transition-new(root){
+  animation-duration:.26s;
+  animation-timing-function:cubic-bezier(.2,.7,.2,1);
+}
+/* 旧页淡出得比新页快一点：两页同权重对拉会有一瞬间的「双影」 */
+::view-transition-old(root){animation-duration:.18s}
+
+@media (prefers-reduced-motion:reduce){
+  @view-transition{navigation:none}
 }
