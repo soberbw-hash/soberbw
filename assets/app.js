@@ -166,55 +166,97 @@
     })();
   }
 
-  /* ---------------- 卡片带 ---------------- */
+  /* ---------------- 卡片带：圆柱内壁弧形 ----------------
+     每张卡片的位置、尺寸、形状，都从「它离视口中心多远」推出来：
+       宽   = 基准宽 × (1 + 0.28·d²)               中间窄、两侧宽
+       左右边缘各自的高度 = 基准高 × (1 + 0.33·q^2.6)  外边缘比内边缘高 → 卡片倾斜
+       垂直中心下沉 H·0.028·d²                      像圆柱内壁的透视
+     形状用 clip-path: path() 画圆角四边形，每帧重算。 */
   function mountRail() {
+    var rail = document.querySelector('.sc-rail');
     var track = document.getElementById('rail');
-    if (!track) return;
+    if (!rail || !track) return;
 
     var originals = [].slice.call(track.children);
-    var n = originals.length;
-    originals.forEach(function (c) {
+    if (!originals.length) return;
+
+    // 8 张图铺不满 1440，硬拉间距会变成「一排卡片」而不是「一圈墙」。
+    // 所以把整组图重复 3 遍，让周期足够长，间距可以压紧。
+    var REPEAT = 3;
+    var n = originals.length * REPEAT;
+    for (var r = 1; r < REPEAT; r++) {
+      originals.forEach(function (c) {
+        var cp = c.cloneNode(true);
+        cp.setAttribute('aria-hidden', 'true');
+        cp.setAttribute('tabindex', '-1');
+        track.appendChild(cp);
+      });
+    }
+    // 再整组复制一份，滚到尾部时无缝接回开头
+    [].slice.call(track.children).forEach(function (c) {
       var clone = c.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
       clone.setAttribute('tabindex', '-1');
       track.appendChild(clone);
     });
-
     var cards = [].slice.call(track.children);
-    var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
-    var setW = 0, baseX = [];
+
+    var W = 0, H = 0, baseW = 0, baseH = 0, pitch = 0, setW = 0;
+
+    // 圆柱内壁：卡片在中间最矮最正，越靠两侧越高，且外缘比内缘更高 → 整张卡倾斜。
+    // 参数是从参考图逐卡量出来的：高度增幅 ~1.37、指数 ~3.3、宽度几乎不变、间距恒定。
+    var GROW_H = 0.46;   // 边缘卡片高度增幅
+    var POW_H = 2.6;     // 高度曲线指数：越大越只在最外侧翘起
+    var GROW_W = 0.12;   // 边缘卡片宽度增幅（参考图几乎不放大，只靠高度出弧）
+    var BOW_X = 0.02;    // 水平外扩，几乎不用，靠间距本身撑开
+    var GAP = 1.11;      // 卡片间距 / 卡宽，参考图约 1.11，压紧才像"墙"
 
     function measure() {
-      setW = 0;
-      for (var i = 0; i < n; i++) setW += originals[i].offsetWidth + gap;
-      baseX = cards.map(function (c) { return c.offsetLeft + c.offsetWidth / 2; });
+      W = rail.clientWidth;
+      H = rail.clientHeight;
+      // 最外侧高度 = baseH*(1+GROW_H) 必须留在 rail 内，留 3% 余量
+      baseH = (H * 0.94) / (1 + GROW_H);
+      baseW = baseH * 0.615;
+      pitch = baseW * GAP;
+      // 一圈至少要盖满一屏，否则首尾接缝会露空
+      if (pitch * n < W * 1.06) pitch = (W * 1.06) / n;
+      setW = pitch * n;
+      // 字幕原本贴着卡片底边，这里取 CSS 里的基础内边距
+      if (capPad < 0) {
+        var c0 = track.querySelector('.cap');
+        capPad = c0 ? (parseFloat(getComputedStyle(c0).bottom) || 12) : 12;
+      }
     }
+    var capPad = -1;
 
-    var offset = 0;
-    var speed = reduce ? 0 : (mobile ? 16 : 24);
-    var paused = false, dragging = false, startX = 0, startOffset = 0, moved = 0;
+    var offset = 0, vel = 0;
+    var dragging = false, lastX = 0, lastT = 0, moved = 0, paused = false;
+    var speed = reduce ? 0 : (mobile ? 14 : 26);
 
     track.addEventListener('pointerenter', function () { paused = true; });
     track.addEventListener('pointerleave', function () { paused = false; });
 
     track.addEventListener('pointerdown', function (e) {
-      dragging = true;
-      moved = 0;
-      startX = e.clientX;
-      startOffset = offset;
+      dragging = true; moved = 0; vel = 0;
+      lastX = e.clientX; lastT = performance.now();
       track.classList.add('dragging');
       track.setPointerCapture(e.pointerId);
     });
     track.addEventListener('pointermove', function (e) {
       if (!dragging) return;
-      moved = e.clientX - startX;
-      offset = startOffset + moved;
+      var now = performance.now();
+      var dt = Math.max(8, now - lastT) / 1000;
+      var dx = e.clientX - lastX;
+      lastX = e.clientX; lastT = now;
+      moved += dx;
+      offset += dx;                 // 跟手 1:1
+      vel = dx / dt;
     });
-    function endDrag(e) {
+    function endDrag() {
       if (!dragging) return;
       dragging = false;
       track.classList.remove('dragging');
-      // 拖完如果几乎没动，就当点击处理，别把链接拦掉
+      // 拖完几乎没动，就当点击处理，别把链接拦掉
       if (Math.abs(moved) > 6) {
         track.addEventListener('click', function (ev) { ev.preventDefault(); }, { once: true });
       }
@@ -225,24 +267,80 @@
     measure();
     addEventListener('resize', measure);
 
+    // 圆角四边形：tl/tr/bl/br 是四条边相对元素顶部的 y
+    function quad(w, tl, bl, tr, br, r) {
+      var W1 = w.toFixed(1), R = r.toFixed(1);
+      return 'path("M' + R + ',' + tl.toFixed(1) +
+        ' L' + (w - r).toFixed(1) + ',' + tr.toFixed(1) +
+        ' Q' + W1 + ',' + tr.toFixed(1) + ' ' + W1 + ',' + (tr + r).toFixed(1) +
+        ' L' + W1 + ',' + (br - r).toFixed(1) +
+        ' Q' + W1 + ',' + br.toFixed(1) + ' ' + (w - r).toFixed(1) + ',' + br.toFixed(1) +
+        ' L' + R + ',' + bl.toFixed(1) +
+        ' Q0,' + bl.toFixed(1) + ' 0,' + (bl - r).toFixed(1) +
+        ' L0,' + (tl + r).toFixed(1) +
+        ' Q0,' + tl.toFixed(1) + ' ' + R + ',' + tl.toFixed(1) + ' Z")';
+    }
+
     var last = performance.now();
     (function loop(t) {
       var dt = Math.min((t - last) / 1000, 0.05);
       last = t;
 
-      if (!paused && !dragging && !reduce) offset -= speed * dt;
+      if (!dragging && Math.abs(vel) > 2) {
+        offset += vel * dt;
+        vel *= Math.pow(0.05, dt);       // 速度每秒衰减到 5%
+      } else if (!dragging && !paused && !reduce) {
+        vel = 0;
+        offset -= speed * dt;            // 常态缓慢左移
+      }
+
       if (setW > 0) {
         while (offset <= -setW) offset += setW;
         while (offset > 0) offset -= setW;
       }
-      track.style.transform = 'translate3d(' + offset.toFixed(2) + 'px,0,0)';
 
-      // 离视口中心越远越小，做出中间大两边小的弧度
-      var mid = innerWidth / 2;
+      var cx = W / 2, half = W / 2, cyBase = H * 0.5;
+
       for (var i = 0; i < cards.length; i++) {
-        var d = Math.abs(baseX[i] + offset - mid);
-        var k = Math.max(0, 1 - d / (innerWidth * 0.62));
-        cards[i].style.transform = 'scale(' + (0.9 + k * 0.14).toFixed(3) + ')';
+        var el = cards[i];
+        var tt = (i * pitch + baseW / 2 + offset) - cx;
+        // 折回 [-setW/2, setW/2)，保证克隆段和原段接上
+        if (setW > 0) tt = ((tt + setW / 2) % setW + setW) % setW - setW / 2;
+
+        var ad = Math.abs(tt) / half;
+        // 视口外就整张停写，48 张卡不必每帧都算
+        if (ad > 1.32) { el.style.visibility = 'hidden'; continue; }
+        el.style.visibility = 'visible';
+
+        var d = ad > 1 ? 1 : ad;
+        var w = baseW * (1 + GROW_W * d * d);
+        var x = cx + tt * (1 + BOW_X * (tt / half) * (tt / half));
+
+        // 左右两条边各自按离圆心的距离求高度：外缘更远 → 更高 → 卡片自然倾斜
+        var qL = Math.abs(tt - w / 2) / half; if (qL > 1) qL = 1;
+        var qR = Math.abs(tt + w / 2) / half; if (qR > 1) qR = 1;
+        var hL = baseH * (1 + GROW_H * Math.pow(qL, POW_H));
+        var hR = baseH * (1 + GROW_H * Math.pow(qR, POW_H));
+
+        var cy = cyBase;
+        var y1L = cy - hL / 2, y2L = cy + hL / 2;
+        var y1R = cy - hR / 2, y2R = cy + hR / 2;
+        var top = Math.min(y1L, y1R), bot = Math.max(y2L, y2R);
+
+        el.style.left = (x - w / 2).toFixed(1) + 'px';
+        el.style.top = top.toFixed(1) + 'px';
+        el.style.width = w.toFixed(1) + 'px';
+        el.style.height = (bot - top).toFixed(1) + 'px';
+        el.style.clipPath = quad(w, y1L - top, y2L - top, y1R - top, y2R - top, Math.max(7, w * 0.075));
+
+        // 文字只在靠中间的卡片上出现，两侧斜切后不显示，避免被裁一半
+        var cap = el.querySelector('.cap');
+        if (cap) {
+          // 弧面把矮的那条边往上切，字幕得跟着抬，否则第二行会被切掉
+          var lift = bot - Math.min(y2L, y2R);
+          cap.style.bottom = (lift + capPad).toFixed(1) + 'px';
+          cap.style.opacity = d < 0.34 ? '1' : (d > 0.72 ? '0' : ((0.72 - d) / 0.38).toFixed(2));
+        }
       }
       requestAnimationFrame(loop);
     })(performance.now());

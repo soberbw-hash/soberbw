@@ -468,7 +468,7 @@ body.dark{background:#0B0F12}
 
 /* ---------- 标题组 ---------- */
 .sc-hero{
-  position:absolute;left:clamp(20px,11vw,196px);top:clamp(94px,17.5vh,178px);z-index:6;
+  position:absolute;left:clamp(20px,11vw,196px);top:clamp(84px,15.5vh,160px);z-index:6;
   max-width:min(92vw,860px);
 }
 .sc-hero h1{
@@ -501,48 +501,41 @@ body.dark{background:#0B0F12}
   letter-spacing:.012em;
 }
 
-/* ---------- 底部卡片带：底部故意被裁掉一点，暗示还在延伸 ---------- */
+/* ---------- 底部卡片带：圆柱内壁弧形（几何全部由 JS 逐帧计算） ---------- */
 .sc-rail{
-  position:absolute;left:0;right:0;bottom:clamp(22px,3.6vh,48px);z-index:7;
-  height:clamp(158px,23vh,262px);
+  position:absolute;left:0;right:0;bottom:clamp(8px,1.4vh,20px);z-index:7;
+  height:clamp(300px,41vh,450px);
   overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%);
-  mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 2.6%,#000 97.4%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 2.6%,#000 97.4%,transparent 100%);
 }
 .sc-track{
-  display:flex;align-items:flex-start;gap:clamp(10px,1.25vw,20px);
-  height:100%;padding:0 clamp(18px,4vw,64px);
-  will-change:transform;
-  cursor:grab;
-  touch-action:pan-y;
+  position:absolute;inset:0;
+  cursor:grab;touch-action:pan-y;
 }
 .sc-track.dragging{cursor:grabbing}
 .sc-card{
-  position:relative;flex:0 0 auto;
-  width:clamp(120px,12.4vw,182px);
-  height:100%;
-  border-radius:14px;overflow:hidden;
+  position:absolute;left:0;top:0;
+  display:block;
   background:#141813;
-  box-shadow:0 24px 54px -20px rgba(0,0,0,.78),inset 0 0 0 1px rgba(255,255,255,.075);
-  transform-origin:center bottom;
-  will-change:transform;
+  overflow:hidden;
+  transform-origin:50% 66%;
+  will-change:transform,clip-path;
+  backface-visibility:hidden;
 }
 .sc-card .art{position:absolute;inset:0}
-.sc-card .art svg{width:100%;height:100%;filter:saturate(.45) brightness(.95)}
+.sc-card .art img{width:100%;height:100%;object-fit:cover;display:block}
 .sc-card::after{
-  content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(8,12,10,0) 56%,rgba(8,12,10,.88) 100%);
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(8,12,10,0) 58%,rgba(8,12,10,.9) 100%);
 }
-.sc-card .cap{position:absolute;left:11px;right:11px;bottom:14px;z-index:2;color:#F2F0EA}
+.sc-card .cap{
+  position:absolute;left:12px;right:12px;bottom:15px;z-index:2;color:#F2F0EA;
+  transition:opacity .35s linear;
+}
 .sc-card .cap b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:500;font-size:12px;line-height:1.4;letter-spacing:.01em}
 .sc-card .cap i{display:block;font-style:normal;font-size:9.5px;color:rgba(242,240,234,.58);margin-top:3px}
 
-.sc-hint{
-  position:absolute;left:50%;bottom:clamp(4px,.8vh,10px);z-index:8;
-  transform:translateX(-50%);width:1px;height:22px;
-  background:linear-gradient(180deg,rgba(250,250,247,0),rgba(250,250,247,.4));
-  opacity:.45;
-}
 
 /* ---------- 入场 ---------- */
 @keyframes sc-rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
@@ -562,13 +555,11 @@ body.dark{background:#0B0F12}
   .sc-en .en{font-size:clamp(24px,7.6vw,42px)}
   .sc-en .sig{font-size:clamp(20px,5.4vw,30px)}
   .sc-sub{font-size:13px;line-height:1.7;max-width:100%}
-  .sc-rail{height:clamp(190px,25vh,238px);bottom:clamp(26px,4vh,40px)}
-  .sc-card{width:clamp(116px,30vw,148px)}
-  .sc-card .cap{left:9px;right:9px;bottom:8px}
+  .sc-rail{height:clamp(210px,31vh,300px);bottom:clamp(26px,4.2vh,44px)}
+  .sc-card .cap{left:9px;right:9px;bottom:10px}
   .sc-card .cap b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sc-card .cap i{display:none}
-  .sc-hint{display:none}
-}
+  }
 
 /* 噪点 + 色彩分级：把程序画的云从"雾"拉向"胶片" */
 .sc-grain{
@@ -705,10 +696,7 @@ body.dt-page>main{width:100%;padding-top:0}
   .dt-next{text-align:left}
 }
 
-/* 首页卡片：竖屏作品窄一些，序列里才有节奏 */
-.sc-card.is-v{width:clamp(84px,8.6vw,124px)}
 @media (max-width:760px){
-  .sc-card.is-v{width:clamp(68px,17vw,92px)}
 }
 
 /* 作品列表里的竖屏卡片 */
@@ -737,26 +725,18 @@ body.dt-page>main{width:100%;padding-top:0}
    真图替换占位图后的统一处理 + 抽牌交互
    ============================================================ */
 
-/* 卡片带：图片铺满，去掉原来的 SVG 滤镜 */
-.sc-card .art img{width:100%;height:100%;object-fit:cover;display:block}
-
-/* 抽牌：鼠标移到卡片上，它从带子里被抽出来一点，并整体停住 */
+/* 抽牌：鼠标移到卡片上，它从弧面上被抽出来，整条带子同时停住 */
 .sc-card{
-  transition:transform .62s cubic-bezier(.16,.84,.28,1),
-             box-shadow .62s cubic-bezier(.16,.84,.28,1),
-             filter .5s ease;
-  will-change:transform;
+  transition:transform .58s cubic-bezier(.34,1.5,.56,1),filter .45s ease;
 }
 .sc-card:hover{
-  transform:translateY(-22px) scale(1.07) rotate(-1.1deg);
-  box-shadow:0 44px 80px -28px rgba(0,0,0,.92), 0 0 0 1px rgba(255,255,255,.16);
-  z-index:6;
+  transform:translateY(-26px) scale(1.075);
+  z-index:9;filter:none;
 }
 .sc-card:hover .cap b{color:#fff}
 .sc-card .cap b{transition:color .35s}
 /* 被抽出的卡片盖住邻卡时，邻卡稍暗一点，视线才集中 */
-.sc-rail:hover .sc-card:not(:hover){filter:brightness(.82) saturate(.85)}
-.sc-rail:hover .sc-card:not(:hover){transition:transform .5s, filter .45s, box-shadow .5s}
+.sc-rail:hover .sc-card:not(:hover){filter:brightness(.76) saturate(.82)}
 
 /* ---------- 首页简介（作品集原文三行） ---------- */
 .sc-sub{
