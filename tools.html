@@ -57,80 +57,184 @@
 <main class="wrap tools-page">
   <div class="sec-head">
     <h1>软件</h1>
+    <p>六个自己写、自己也在用的工具。起点都一样：先用，发现哪一步不顺手，再决定要不要动手。</p>
   </div>
 
   <div class="tool-list">
-    <article class="tool">
-      <a class="tool-shot is-ui" href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener" aria-label="B 站封面预览">
-        <img src="img/tools/bili-demo.jpg" alt="B 站封面预览" loading="lazy">
-      </a>
+    <article class="tool" id="shanghao">
+      <div class="tool-visual">
+        <a class="tool-main" href="https://github.com/soberbw-hash/shanghao" target="_blank" rel="noopener" aria-label="上号">
+          <img src="img/tools/sh/room.jpg" alt="上号 界面" loading="lazy">
+        </a>
+      </div>
       <div class="tool-info">
-        <div class="tool-top">
-          <h2>B 站封面预览</h2>
-          <span class="tool-tech">纯静态 · 2026.08</span>
+        <div class="tool-meta">
+          <span class="tool-no">01</span>
+          <span class="tool-kind">Windows 桌面端</span>
         </div>
-        <p class="tool-desc">把封面放进近似 B 站首页和手机端推荐流里，判断它值不值得被点开。</p>
-        <ul class="tool-points"><li>52 张已导入的主播封面做参照</li><li>上传封面，立刻看到它在真实推荐流里的样子</li><li>纯静态页面，打开即用</li></ul>
-        <a class="tool-link" href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener">在线 Demo <span>↗</span></a>
+        <h2>上号<span class="tool-en">ShangHao</span></h2>
+        <p class="tool-lead">给固定朋友长期挂语音、开黑和聊天的桌面语音房。</p>
+        <p class="tool-desc">现成的语音软件不是给公会做的，就是给会议做的，没人管「一群朋友整晚挂在一起」这件小事。上号把房间当成场景来做：谁在打游戏、谁走开了、昨晚聊了什么，都在同一个画面里。</p>
+        <ul class="tool-points">
+          <li><b>状态从机器读，不靠人改签名</b><span>支持的游戏和正在播放的歌会自己显示在工位上；连续 30 分钟无操作进入离开态并静音，回来按离开前的状态恢复。</span></li>
+          <li><b>AI 接在录音之后，不塞进聊天</b><span>转录走 SenseVoiceSmall，整理与问答走 GLM-4-Flash，也能换成本地模型。密钥用 Windows 加密只留本机，摘要默认不出这台电脑。</span></li>
+          <li><b>降噪不把麦克风交给云</b><span>DeepFilterNet3 的模型与 WASM 在本机加载，AudioWorklet 里处理。检测到双讲时主动降低抑制强度，避免字头被吞、人声发闷。</span></li>
+          <li><b>五个人的连接是要算的</b><span>五人全互联是 10 条成员连接、20 条定向媒体路径，所以做了按成员回退到 Relay 的恢复策略：坏哪一路，先救那一位。</span></li>
+        </ul>
+        <div class="tool-foot">
+          <span class="tool-stack">Electron · WebRTC / Opus · React · 2026.10</span>
+          <a class="tool-link" href="https://github.com/soberbw-hash/shanghao" target="_blank" rel="noopener">GitHub 与下载 <span>↗</span></a>
+        </div>
+      </div>
+      <div class="tool-shots">
+        <figure class="is-fit">
+          <img src="img/tools/sh/memory.jpg" alt="上号 界面" loading="lazy">
+          <figcaption>语音记忆：逐句转录、精彩片段与当晚摘要</figcaption>
+        </figure>
+        <figure>
+          <img src="img/tools/sh/ai.jpg" alt="上号 界面" loading="lazy">
+          <figcaption>AI 配置：云端模型、本地模型与自定义接口</figcaption>
+        </figure>
+        <figure>
+          <img src="img/tools/sh/audio.jpg" alt="上号 界面" loading="lazy">
+          <figcaption>麦克风链：降噪、回声消除、人声增强、自动增益</figcaption>
+        </figure>
       </div>
     </article>
-    <article class="tool">
-      <a class="tool-shot is-ui" href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener" aria-label="声作">
-        <img src="img/tools/shengzuo-ui.png" alt="声作" loading="lazy">
-      </a>
+    <article class="tool is-flip" id="weave">
+      <div class="tool-visual">
+        <a class="tool-main" href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener" aria-label="Weave">
+          <img src="img/tools/weave-lib.jpg" alt="Weave 界面" loading="lazy">
+        </a>
+      </div>
       <div class="tool-info">
-        <div class="tool-top">
-          <h2>声作</h2>
-          <span class="tool-tech">TypeScript · 2026.08</span>
+        <div class="tool-meta">
+          <span class="tool-no">02</span>
+          <span class="tool-kind">桌面端 / 浏览器</span>
         </div>
-        <p class="tool-desc">Windows 本地声音克隆、长稿配音与多人脚本工作台。</p>
-        <ul class="tool-points"><li>声音克隆在本机完成</li><li>长稿分段配音</li><li>多人脚本分配</li><li>素材不上传</li></ul>
-        <a class="tool-link" href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener">GitHub <span>↗</span></a>
+        <h2>Weave<span class="tool-en">Local asset workspace</span></h2>
+        <p class="tool-lead">把散在十几个文件夹里的素材，收成一个找得到的项目。</p>
+        <p class="tool-desc">剪辑之前最耗时的不是剪，是找。Weave 把素材库、自由画布和剪辑对照放进同一个项目：素材按角色、场景、道具、视频、音频归类，画布上按思路摆放，文稿和素材逐段对齐。</p>
+        <ul class="tool-points">
+          <li><b>素材先有身份，才有位置</b><span>导入时按类型归类，网格和画布两种看法——同一批素材既能按时间扫一遍，也能按思路摆开。</span></li>
+          <li><b>剪辑对照，把文稿和画面对上</b><span>文稿放进去，素材拖到段落旁边；不用在时间线和十几个文件夹之间来回切。</span></li>
+          <li><b>项目是一个能带走的文件夹</b><span>数据留在本地项目目录，更新程序不碰项目本身；备份打包成 ZIP，换机器直接带走。</span></li>
+          <li><b>便携优先</b><span>Windows 免安装包解压即用，另有浏览器版；自动更新下载完先校验 SHA-256 再替换。</span></li>
+        </ul>
+        <div class="tool-foot">
+          <span class="tool-stack">Electron · TypeScript · 本地优先 · 2026.10</span>
+          <a class="tool-link" href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener">GitHub 与下载 <span>↗</span></a>
+        </div>
+      </div>
+      <div class="tool-shots">
+        <figure>
+          <img src="img/tools/weave-canvas.jpg" alt="Weave 界面" loading="lazy">
+          <figcaption>自由画布：未摆放的素材在右侧待命</figcaption>
+        </figure>
+        <figure class="is-fit">
+          <img src="img/tools/weave-pack.jpg" alt="Weave 界面" loading="lazy">
+          <figcaption>项目里的一组 AI 素材：同一角色的多套画面</figcaption>
+        </figure>
       </div>
     </article>
-    <article class="tool">
-      <a class="tool-shot is-card" href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener" aria-label="Weave">
-        <img src="img/tools/weave-card.jpg" alt="Weave" loading="lazy">
-      </a>
+    <article class="tool" id="shengzuo">
+      <div class="tool-visual">
+        <a class="tool-main" href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener" aria-label="声作">
+          <img src="img/tools/shengzuo.jpg" alt="声作 界面" loading="lazy">
+        </a>
+      </div>
       <div class="tool-info">
-        <div class="tool-top">
-          <h2>Weave</h2>
-          <span class="tool-tech">TypeScript · 2026.10</span>
+        <div class="tool-meta">
+          <span class="tool-no">03</span>
+          <span class="tool-kind">Windows 桌面端</span>
         </div>
-        <p class="tool-desc">本地创作素材管理与制作工作台。</p>
-        <ul class="tool-points"><li>素材散在十个文件夹里，需要一个地方记住它们</li><li>管住、找到，串成一条制作线</li></ul>
-        <a class="tool-link" href="https://github.com/soberbw-hash/Weave" target="_blank" rel="noopener">GitHub <span>↗</span></a>
+        <h2>声作<span class="tool-en">ShengZuo</span></h2>
+        <p class="tool-lead">用自己的声音，把长稿念完。</p>
+        <p class="tool-desc">配音的门槛不在模型，在流程：一段一段试、一句一句改、失败了从头再来。声作把长稿配音做成可以续的任务——句子级进度、后台排队生成、只重做改动过的那几句。</p>
+        <ul class="tool-points">
+          <li><b>声音留在本机</b><span>克隆、合成、导出全在本地跑；没有账号、没有会员、没有遥测，录音和文稿默认不出这台电脑。</span></li>
+          <li><b>长稿是任务，不是一次请求</b><span>导入 SRT / TXT / Word / Excel 按句编辑，已完成的句子保留，中途失败只重做失败的那几句。</span></li>
+          <li><b>AI 只标停顿和情绪，不改原文</b><span>智能处理先在本机固定原稿与分段，只让接口按编号返回参数；响应里混进改写文字也覆盖不了正文。</span></li>
+          <li><b>三款模型按需换</b><span>VoxCPM2 综合最稳，Fun-CosyVoice3 覆盖 19 种方言，IndexTTS-2.5 做情绪演绎；默认只加载一个，切换时释放上一个。</span></li>
+        </ul>
+        <div class="tool-foot">
+          <span class="tool-stack">Electron · TypeScript · 本地推理 · 2026.08</span>
+          <a class="tool-link" href="https://github.com/soberbw-hash/shengzuo" target="_blank" rel="noopener">GitHub 与下载 <span>↗</span></a>
+        </div>
+      </div>
+      
+    </article>
+    <article class="tool is-flip" id="bili">
+      <div class="tool-visual">
+        <a class="tool-main" href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener" aria-label="B 站封面预览">
+          <img src="img/tools/bili-desktop.jpg" alt="B 站封面预览 界面" loading="lazy">
+        </a>
+      </div>
+      <div class="tool-info">
+        <div class="tool-meta">
+          <span class="tool-no">04</span>
+          <span class="tool-kind">网页工具</span>
+        </div>
+        <h2>B 站封面预览<span class="tool-en">Cover preview</span></h2>
+        <p class="tool-lead">封面好不好，放进推荐流里才知道。</p>
+        <p class="tool-desc">封面躺在文件夹里和在推荐流里是两个东西——尺寸被压、旁边全是别人的脸。这个工具把封面放进近似 B 站首页和手机端的版式里，直接看它抢不抢眼。</p>
+        <ul class="tool-points">
+          <li><b>桌面和手机一起看</b><span>两种推荐流版式分开预览，一次判断两个场景，不用做完再上传试错。</span></li>
+          <li><b>52 张真实封面做参照</b><span>参照不是空白格子，是已经跑出来的封面；比较的是同一屏里的注意力，不是一张图的构图。</span></li>
+          <li><b>纯静态，打开就能用</b><span>不经过服务器，导入封面即预览，一键截图存证。</span></li>
+        </ul>
+        <div class="tool-foot">
+          <span class="tool-stack">HTML / CSS / JS · 纯静态 · 2026.08</span>
+          <a class="tool-link" href="https://soberbw-hash.github.io/bilibili-cover-preview/" target="_blank" rel="noopener">在线试用 <span>↗</span></a>
+        </div>
+      </div>
+      <div class="tool-shots">
+        <figure>
+          <img src="img/tools/bili-phone.jpg" alt="B 站封面预览 界面" loading="lazy" style="object-position:top center">
+          <figcaption>手机端推荐流：双列卡片下的可读性</figcaption>
+        </figure>
+        <figure>
+          <img src="img/tools/bili-demo.jpg" alt="B 站封面预览 界面" loading="lazy" style="object-position:top center">
+          <figcaption>导入自己的封面后，直接看它在同一屏里的位置</figcaption>
+        </figure>
       </div>
     </article>
-    <article class="tool">
-      <a class="tool-shot is-icon" href="https://github.com/soberbw-hash/WinGlow" target="_blank" rel="noopener" aria-label="WinGlow">
-        <img src="img/tools/icon-winglow.png" alt="WinGlow" loading="lazy">
-      </a>
-      <div class="tool-info">
-        <div class="tool-top">
+  </div>
+
+  <div class="tool-mini">
+    <article class="mini" id="winglow">
+      <div class="mini-top">
+        <img class="mini-icon" src="img/tools/icon-winglow.png" alt="WinGlow" loading="lazy">
+        <div class="mini-head">
           <h2>WinGlow</h2>
-          <span class="tool-tech">Rust · 2026.10</span>
+          <span class="mini-no">05</span>
         </div>
-        <p class="tool-desc">让 Windows 更好看、更好用：字体、右键菜单、任务栏、窗口与开始菜单。</p>
-        <ul class="tool-points"><li>字体、右键菜单、任务栏、窗口与开始菜单一键调整</li><li>默认 Rain 动态壁纸</li><li>修改前备份、一键还原、托盘运行</li></ul>
+      </div>
+      <p class="mini-desc">让 Windows 更好看，也更好用。字体、右键菜单、任务栏、窗口材质和开始菜单收在一个界面里；改之前先备份，能撤销、能一键还原，点叉号缩到托盘继续生效。</p>
+      <ul class="mini-tags"><li>鸿蒙 / 思源黑体一键换</li><li>右键菜单精简与还原</li><li>动态壁纸可选组件</li></ul>
+      <div class="tool-foot">
+        <span class="tool-stack">Rust / Tauri 2 · React · 2026.10</span>
         <a class="tool-link" href="https://github.com/soberbw-hash/WinGlow" target="_blank" rel="noopener">GitHub <span>↗</span></a>
       </div>
     </article>
-    <article class="tool">
-      <a class="tool-shot is-icon" href="https://github.com/soberbw-hash/WinEase" target="_blank" rel="noopener" aria-label="WinEase">
-        <img src="img/tools/icon-winease.png" alt="WinEase" loading="lazy">
-      </a>
-      <div class="tool-info">
-        <div class="tool-top">
+    <article class="mini" id="winease">
+      <div class="mini-top">
+        <img class="mini-icon" src="img/tools/icon-winease.png" alt="WinEase" loading="lazy">
+        <div class="mini-head">
           <h2>WinEase</h2>
-          <span class="tool-tech">Rust · 2026.10</span>
+          <span class="mini-no">06</span>
         </div>
-        <p class="tool-desc">极简 Windows 工具箱：清理、空间管理、应用管理与常用系统设置。</p>
-        <ul class="tool-points"><li>清理与空间管理</li><li>应用管理</li><li>常用系统设置</li><li>都在一个窗口里做完</li></ul>
+      </div>
+      <p class="mini-desc">极简 Windows 工具箱。首页把清理、空间、体检、网络、开机等九类检查一次跑完，看完结果再决定执行哪些；清理只扫白名单，个人文件走回收站。</p>
+      <ul class="mini-tags"><li>九类一键检查</li><li>按证据修网络</li><li>空间占用图下钻</li></ul>
+      <div class="tool-foot">
+        <span class="tool-stack">Rust / Tauri 2 · React 19 · 2026.10</span>
         <a class="tool-link" href="https://github.com/soberbw-hash/WinEase" target="_blank" rel="noopener">GitHub <span>↗</span></a>
       </div>
     </article>
   </div>
+
+  <p class="tool-note">截图取自软件实际运行界面；其中的房间成员、录音与项目素材为演示数据。</p>
 </main>
 <footer class="wrap">
     <span>© 2026 尤博文</span>

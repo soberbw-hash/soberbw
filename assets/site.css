@@ -1078,55 +1078,182 @@ body.dt-page>main{width:100%;padding-top:0}
 .skill-list dd{font-size:13px;line-height:1.6;color:var(--ink-d)}
 
 /* ============================================================
-   软件页：图文并茂
+   软件页
+   左图右文。图区是「一张主图 + 一排细节图」，主图给整体印象，
+   细节图带说明，负责讲清楚界面里到底有什么。
    ============================================================ */
-.tool-list{display:grid;gap:clamp(44px,7vh,86px)}
+.tool-list{display:grid;gap:clamp(54px,8.6vh,108px)}
 .tool{
-  display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);
-  gap:clamp(26px,4.2vw,66px);align-items:center;
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
+  gap:clamp(14px,2vh,22px) clamp(24px,3.6vw,58px);
+  align-items:start;
+  padding-top:clamp(20px,3vh,34px);
+  border-top:1px solid var(--rule-d);
 }
-.tool:nth-child(even) .tool-shot{order:2}
-.tool-shot{
-  display:block;position:relative;overflow:hidden;
-  aspect-ratio:4/3;background:#EDEBE3;
+/* 图永远占宽的那一栏；偶数条左右对调，长页面才有呼吸的节奏。
+   用显式定位而不是 order：细节图横跨整行，order 会把它挤到图上面去。 */
+.tool-visual{grid-column:1;grid-row:1;min-width:0}
+.tool-info{grid-column:2;grid-row:1;min-width:0}
+.tool.is-flip .tool-visual{grid-column:2}
+.tool.is-flip .tool-info{grid-column:1}
+
+.tool-main{
+  display:block;overflow:hidden;background:#EDEBE3;
+  aspect-ratio:16/10;
   border:1px solid var(--rule-d);border-radius:3px;
 }
-.tool-shot img{
-  width:100%;height:100%;object-fit:cover;object-position:top center;display:block;
-  transition:transform .9s var(--ease),filter .5s;
+.tool-main img{
+  width:100%;height:100%;object-fit:cover;object-position:top center;
+  display:block;transition:transform .9s var(--ease);
 }
-.tool-shot:hover img{transform:scale(1.03)}
+.tool-main:hover img{transform:scale(1.02)}
+
+/* 细节图：横跨整行，每张固定占三分之一宽。张数少的条目右端留白，
+   比把它拉满更像「就这些」，也比塞进图区下面那窄条里看得清 */
+.tool-shots{
+  grid-column:1/-1;grid-row:2;
+  display:flex;flex-wrap:wrap;gap:clamp(10px,1.3vw,18px);
+}
+.tool-shots figure{margin:0;min-width:0;flex:1 1 26%;max-width:50%}
+.tool-shots img{
+  width:100%;aspect-ratio:4/3;object-fit:cover;object-position:top center;
+  display:block;background:#EDEBE3;
+  border:1px solid var(--rule-d);border-radius:2px;
+  transition:transform .7s var(--ease),border-color .3s;
+}
+/* 超宽的整条截图（比如转录列表）裁两边会把句子切断，改成完整放进浅色衬底 */
+.tool-shots figure.is-fit img{object-fit:contain;background:#F1EFE8}
+.tool-shots figure:hover img{transform:translateY(-2px);border-color:#CFCCC0}
+.tool-shots figcaption{
+  margin-top:8px;font-size:11px;line-height:1.65;color:var(--ink-d3);
+  text-wrap:pretty;
+}
+
 .tool-info{min-width:0}
-.tool-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.tool-info h2{font-weight:600;font-size:clamp(19px,1.8vw,26px);line-height:1.25;letter-spacing:-.015em}
-.tool-tech{font-size:11px;color:var(--ink-d3);letter-spacing:.06em;white-space:nowrap}
-.tool-desc{margin-top:12px;font-size:clamp(13.5px,1.02vw,15px);line-height:1.85;color:#3A3931}
-/* 要点：细横线分隔，不做成打勾列表，保持干净 */
+.tool-meta{
+  display:flex;align-items:baseline;gap:10px;
+  font-size:10.5px;letter-spacing:.13em;color:var(--ink-d3);
+}
+.tool-no{color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.tool-info h2{
+  margin-top:10px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  font-weight:600;font-size:clamp(22px,2.1vw,30px);line-height:1.2;letter-spacing:-.02em;
+}
+.tool-en{
+  font-size:10.5px;font-weight:400;letter-spacing:.12em;
+  color:var(--ink-d3);text-transform:uppercase;
+}
+/* 定位句比正文大一档：先让人知道这是什么，再读细节 */
+.tool-lead{
+  margin-top:clamp(12px,1.8vh,18px);
+  font-size:clamp(14px,1.14vw,16.5px);line-height:1.62;
+  font-weight:500;color:var(--ink-d);letter-spacing:-.004em;text-wrap:pretty;
+}
+.tool-desc{
+  margin-top:10px;font-size:clamp(12.8px,.95vw,14px);line-height:1.9;
+  color:#4A4941;text-wrap:pretty;
+}
+/* 要点：细横线分隔，标题加粗但不换行，保持一条一条读下去 */
 .tool-points{
-  list-style:none;margin-top:clamp(14px,2vh,20px);
+  list-style:none;margin-top:clamp(16px,2.4vh,24px);
   border-top:1px solid var(--rule-d);
-  padding-top:clamp(12px,1.8vh,17px);
-  display:grid;gap:clamp(6px,.9vh,9px);
+  padding-top:clamp(12px,1.8vh,16px);
+  display:grid;gap:clamp(8px,1.3vh,12px);
 }
 .tool-points li{
   position:relative;padding-left:15px;
-  font-size:clamp(12.5px,.96vw,13.8px);line-height:1.7;color:var(--ink-d2);
+  font-size:clamp(12.2px,.92vw,13.4px);line-height:1.74;color:#55544B;
 }
 .tool-points li::before{
-  content:"";position:absolute;left:1px;top:.72em;
+  content:"";position:absolute;left:1px;top:.68em;
   width:5px;height:1px;background:var(--gold);
 }
-.tool-detail{margin-top:8px;font-size:12.5px;line-height:1.85;color:var(--ink-d2)}
-.tool-link{
+.tool-points b{font-weight:600;color:var(--ink-d);margin-right:.45em}
+
+.tool-foot{
   margin-top:clamp(16px,2.4vh,24px);
+  border-top:1px solid var(--rule-d);
+  padding-top:clamp(11px,1.6vh,15px);
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;
+}
+.tool-stack{font-size:11px;color:var(--ink-d3);letter-spacing:.04em}
+.tool-link{
   display:inline-flex;align-items:center;gap:6px;
-  margin-top:clamp(14px,2.2vh,20px);
   font-size:12.5px;color:var(--ink-d);
   border-bottom:1px solid var(--ink-d);padding-bottom:2px;
   transition:color .25s,border-color .25s,gap .25s;
 }
 .tool-link span{font-size:11px;opacity:.6}
 .tool-link:hover{color:var(--accent);border-color:var(--accent);gap:9px}
+
+/* ---- 两个 Windows 小工具：并排的小卡，不占整屏 ---- */
+.tool-mini{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:clamp(14px,2vw,28px);
+  margin-top:clamp(40px,7vh,78px);
+  padding-top:clamp(26px,4vh,44px);
+  border-top:1px solid var(--rule-d);
+}
+.mini{
+  display:flex;flex-direction:column;
+  padding:clamp(18px,2.2vw,30px);
+  border:1px solid var(--rule-d);border-radius:3px;background:#FBFAF6;
+}
+.mini-top{display:flex;align-items:center;gap:14px}
+.mini-icon{
+  width:clamp(38px,3.4vw,46px);height:clamp(38px,3.4vw,46px);
+  object-fit:contain;border-radius:10px;
+  filter:drop-shadow(0 7px 16px rgba(40,36,26,.18));
+}
+.mini-head{flex:1;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.mini-head h2{font-weight:600;font-size:clamp(17px,1.5vw,21px);letter-spacing:-.015em}
+.mini-no{font-size:10.5px;letter-spacing:.13em;color:var(--gold);font-variant-numeric:tabular-nums}
+.mini-desc{
+  margin-top:14px;font-size:12.8px;line-height:1.86;color:#4A4941;text-wrap:pretty;
+}
+.mini-tags{list-style:none;margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.mini-tags li{
+  font-size:11px;line-height:1;padding:6px 9px;
+  border:1px solid var(--rule-d);border-radius:2px;
+  color:var(--ink-d2);background:#fff;
+}
+/* 小卡高度不等，把页脚压到底，两栏的链接才对得齐 */
+.mini .tool-foot{margin-top:auto;padding-top:clamp(14px,2vh,20px);border-top:0}
+
+.tool-note{
+  margin-top:clamp(30px,5vh,54px);
+  font-size:11.5px;line-height:1.8;color:var(--ink-d3);
+}
+
+/* 两栏撑不住了就上下排：1024 以下图占满宽，细节图反而更大更好看 */
+@media (max-width:1024px){
+  .tool{grid-template-columns:1fr;gap:clamp(20px,3vh,30px)}
+  .tool-visual,.tool-info,
+  .tool.is-flip .tool-visual,.tool.is-flip .tool-info{grid-column:1}
+  .tool-visual{grid-row:1}
+  .tool-info{grid-row:2}
+  .tool-shots{grid-row:3}
+  .tool-mini{grid-template-columns:1fr}
+  .mini-desc{max-width:56ch}
+}
+/* 手机端细节图改成横滑：一屏三张会缩成色块，滑过去一张一张看更清楚 */
+@media (max-width:640px){
+  .tool-main{aspect-ratio:4/3}
+  .tool-shots{
+    display:flex;flex-wrap:nowrap;gap:10px;
+    overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    margin-right:calc(var(--m) * -1);padding-right:var(--m);
+  }
+  .tool-shots::-webkit-scrollbar{display:none}
+  .tool-shots figure{flex:0 0 74%;max-width:none;scroll-snap-align:start}
+  .tool-shots figcaption{font-size:10.5px;margin-top:6px}
+  .tool-info h2{gap:9px}
+  .tool-lead{font-size:15px}
+  .tool-foot{gap:10px}
+}
 
 /* ============================================================
    联系页
@@ -1182,8 +1309,6 @@ body.dt-page>main{width:100%;padding-top:0}
   #exp-0:checked~.exp-list label[for="exp-0"],
   #exp-1:checked~.exp-list label[for="exp-1"],
   #exp-2:checked~.exp-list label[for="exp-2"]{border-left-color:transparent;border-top-color:var(--ink-d)}
-  .tool{grid-template-columns:1fr;gap:clamp(16px,2.6vh,24px)}
-  .tool:nth-child(even) .tool-shot{order:0}
   .skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ct-grid,.ct-links{grid-template-columns:1fr;gap:12px}
   .dt-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1212,9 +1337,6 @@ body.dt-page>main{width:100%;padding-top:0}
 .sc-card .cap{transition:transform .45s var(--ease)}
 .sc-card:hover .cap{transform:translateY(-3px)}
 
-/* ---------- 软件页：统一 2:1，GitHub 卡片和截图都不被裁歪 ---------- */
-.tool-shot img{object-position:top center}
-
 /* ---------- 联系页：内容少，整页垂直居中，别把 footer 甩到天边 ---------- */
 body.inner .contact-page{
   display:flex;flex-direction:column;justify-content:center;
@@ -1227,29 +1349,6 @@ body.inner .contact-page .sec-head{margin-bottom:clamp(28px,4.4vh,48px)}
 .ct-links a span{color:var(--ink-d3)}
 .ct-links a:hover span{color:var(--ink-d2)}
 
-/* ---------- 软件页图片区：截图 / 仓库卡 / 图标海报，三种都装进同一个 2:1 框 ---------- */
-.tool-shot.is-ui img{object-fit:cover;object-position:top center}
-/* 图标海报：浅色渐变底 + 居中大图标，做成产品卡的样子 */
-.tool-shot.is-icon{
-  display:grid;place-items:center;
-  background:
-    radial-gradient(90% 120% at 50% 0%, #FBFAF6 0%, #EFEDE5 62%, #E6E3D9 100%);
-  border-color:#E4E2DA;
-}
-.tool-shot.is-icon img{
-  width:auto;height:64%;object-fit:contain;
-  filter:drop-shadow(0 22px 44px rgba(40,36,26,.18));
-  transition:transform .8s var(--ease);
-}
-.tool-shot.is-icon:hover img{transform:translateY(-4px) scale(1.02)}
-
-/* 仓库卡：白底 + 细边，别让它在纸白上显得突兀 */
-.tool-shot.is-card{
-  background:#EFEDE5;
-  border-color:#DCD9CF;
-  box-shadow:0 22px 50px -34px rgba(20,20,18,.4);
-}
-.tool-shot.is-card img{object-fit:contain;object-position:center;padding:clamp(10px,1.4vw,18px)}
 /* 剧照墙：图已统一裁到 2:1，容器同比例 → 零裁切，完整呈现 */
 .dt-gallery figure{aspect-ratio:2/1}
 /* 5 张时最后一张跨两列收尾，正好填满，不留豁口 */
