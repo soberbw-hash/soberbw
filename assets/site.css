@@ -421,6 +421,20 @@ body.dark{background:#0B0F12}
     linear-gradient(180deg, #1E2C3A 0%, #2C3D4A 20%, #3E5159 38%, #5C6B6C 54%, #9A8B7A 68%, #C99A70 80%, #B87F50 100%);
 }
 
+/* 悬浮岛短片：垫在最底下当活背景。模糊只做一点点（约 4px），主体靠亮度和不透明度压住。
+   取景特意放大并往右上推：让「人和电脑」落在标题右侧的空白区，草地压在文字下面当暗场，
+   既看得见内容，又不跟标题抢。 */
+.sc-film{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  width:100%;height:100%;object-fit:cover;object-position:50% 46%;
+  transform:translate(20%,-8%) scale(1.48);
+  filter:blur(3px) saturate(.80) brightness(.80) contrast(1.02);
+  opacity:.79;
+  /* 下缘淡出，别让片子的亮部在卡片带后面糊成一片雾 */
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 46%,rgba(0,0,0,.62) 68%,rgba(0,0,0,.16) 88%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 0%,#000 46%,rgba(0,0,0,.62) 68%,rgba(0,0,0,.16) 88%,transparent 100%);
+}
+
 .sc-sky{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;filter:contrast(1.14) saturate(1.06)}
 
 .sc-ridge{position:absolute;left:0;right:0;bottom:0;height:clamp(150px,28vh,320px);z-index:3;pointer-events:none}
@@ -545,6 +559,17 @@ body.dark{background:#0B0F12}
 .sc-nav{animation:sc-rise .9s var(--ease) both}
 .sc-rail{animation:sc-rise 1.2s .28s var(--ease) both}
 
+/* 竖屏 / 方屏：16:9 的片子会被裁得很窄，取景改成偏中心偏上，
+   让「人和电脑」落在正文和卡片带之间的空档里，亮度也压低一档免得中间发雾 */
+@media (max-width:1024px){
+  .sc-film{
+    transform:scale(1.06);
+    object-position:52% 40%;
+    filter:blur(3px) saturate(.86) brightness(.72) contrast(1.0);
+    opacity:.74;
+  }
+}
+
 @media (max-width:760px){
   .sc-nav{padding:0 16px;gap:8px}
   .sc-links{gap:13px;font-size:12.5px}
@@ -559,6 +584,13 @@ body.dark{background:#0B0F12}
   .sc-card .cap{left:9px;right:9px;bottom:10px}
   .sc-card .cap b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sc-card .cap i{display:none}
+  /* 竖屏没地方放岛，取右侧云层当暖色氛围，别让草地糊在正文后面 */
+  .sc-film{
+    transform:scale(1.12);
+    object-position:66% 42%;
+    filter:blur(3px) saturate(.86) brightness(.82) contrast(1.0);
+    opacity:.74;
+  }
   }
 
 /* 噪点 + 色彩分级：把程序画的云从"雾"拉向"胶片" */

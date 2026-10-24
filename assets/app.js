@@ -346,9 +346,36 @@
     })(performance.now());
   }
 
+  /* ---------------- 背景短片 ---------------- */
+  function mountFilm() {
+    var film = document.getElementById('film');
+    if (!film) return;
+    // 有些浏览器不认 HTML 上的 muted，得在 JS 里再压一次，否则自动播放会被拦
+    film.muted = true;
+    film.defaultMuted = true;
+    if (reduce) {
+      // 关掉动效偏好就别让它转。直接把片源摘掉，只留 poster 那张静态帧，
+      // 比 pause + seek 可靠（某些浏览器在暂停态下不让改 currentTime）
+      film.removeAttribute('autoplay');
+      film.pause();
+      [].slice.call(film.querySelectorAll('source')).forEach(function (s) { s.remove(); });
+      film.removeAttribute('src');
+      film.load();
+      return;
+    }
+    // 标签页切到后台就停，别白烧电
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) film.pause();
+      else film.play().catch(function () {});
+    });
+    var p = film.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+
   /* ---------------- 启动 ---------------- */
   var sky = document.getElementById('sky');
   if (sky) mountClouds(sky);
+  mountFilm();
   mountTilt();
   mountRail();
 })();
