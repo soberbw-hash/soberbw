@@ -149,8 +149,14 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
 .list-grid .cap b{font-weight:500;font-size:clamp(15px,1.3vw,19px)}
 .list-grid .cap i{font-style:normal;font-size:12px;color:var(--ink-d3);white-space:nowrap}
 .list-grid a:hover .cap b{color:var(--accent)}
+/* 没有真实链接的条目不做成可点的样子——宁可不点，也不要点了没反应。 */
+.list-grid a.nolink{cursor:default}
+.list-grid a.nolink:hover .cap b{color:inherit}
 .cat-nav{display:flex;gap:clamp(12px,2vw,24px);font-size:13px;color:var(--ink-d3);margin-bottom:clamp(22px,3vh,34px);flex-wrap:wrap}
 .cat-nav span{color:var(--ink-d);border-bottom:1px solid var(--ink-d);padding-bottom:2px}
+.cat-nav em{font-style:normal}
+.contact-grid a.nolink{cursor:default}
+.contact-grid a.nolink:hover b{color:inherit}
 
 /* ---------- 关于页 ---------- */
 .about-page{padding-top:clamp(96px,14vh,150px)}
@@ -215,7 +221,7 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ============ 一级页：简介入口 ============ */
 .intro-inner{position:absolute;left:0;right:0;bottom:clamp(72px,12vh,140px);z-index:3}
-.entries{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,2vw,32px);margin-top:clamp(28px,4.4vh,50px);border-top:1px solid rgba(255,255,255,.16);padding-top:clamp(16px,2.2vh,22px);max-width:920px}
+.entries{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,2vw,32px);margin-top:clamp(28px,4.4vh,50px);border-top:1px solid rgba(255,255,255,.16);padding-top:clamp(16px,2.2vh,22px)}
 .entries a{display:block;color:var(--ink-l)}
 .entries b{display:block;font-weight:500;font-size:clamp(16px,1.4vw,20px);transition:color .2s}
 .entries i{display:block;font-style:normal;font-size:11.5px;color:#8E8A7F;margin-top:5px;letter-spacing:.02em}
@@ -223,6 +229,12 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ============ 二级页公共 ============ */
 .list-page,.resume-page,.tools-page,.contact-page{padding-top:clamp(96px,13vh,146px);padding-bottom:clamp(48px,7vh,90px)}
+/* 联系页内容少，把收尾那句压到底，空的那段就变成留白而不是断掉 */
+.contact-page{display:flex;flex-direction:column}
+.contact-page .facts{margin-top:auto}
+.contact-page .facts p{font-size:clamp(14px,1.15vw,15.5px);color:var(--ink-d2)}
+.contact-note{padding-top:clamp(40px,7vh,84px);max-width:52ch}
+.contact-note p{font-size:clamp(13.5px,1.05vw,14.5px);line-height:2.1;color:var(--ink-d2)}
 
 /* 简历 */
 .timeline{margin-top:clamp(32px,4.6vh,56px);border-top:1px solid var(--ink-d)}
@@ -266,6 +278,11 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* 二级页浅色顶栏 */
 body.inner .topbar{background:rgba(245,244,240,.88);border-bottom:1px solid var(--rule-d)}
+/* 内容短的二级页把页脚压到底部，别让它悬在半空 */
+body.inner{display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
+body.inner>main{flex:1 0 auto}
+/* flex 子项遇到 margin:auto 会退化成 shrink-to-fit，必须显式给宽度 */
+body.inner>main,body.inner>footer{width:100%}
 body.inner .topbar .in{color:var(--ink-d)}
 body.inner .mark span{color:var(--ink-d2)}
 body.inner .topbar nav{color:var(--ink-d2)}
