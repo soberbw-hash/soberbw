@@ -609,9 +609,9 @@ body.dark{background:#0B0F12}
 
 /* ---------- 底部卡片带：圆柱内壁弧形（几何全部由 JS 逐帧计算） ---------- */
 .sc-rail{
-  position:absolute;left:0;right:0;bottom:clamp(10px,1.6vh,24px);z-index:7;
+  position:absolute;left:0;right:0;bottom:0;z-index:7;
   /* 比上一版收了一成半：整屏元素本来就多，卡片带再满，正文就没气了 */
-  height:clamp(258px,35vh,386px);
+  height:clamp(244px,33vh,368px);
   overflow:hidden;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 2.6%,#000 97.4%,transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0,#000 2.6%,#000 97.4%,transparent 100%);

@@ -201,7 +201,7 @@
     });
     var cards = [].slice.call(track.children);
 
-    var W = 0, H = 0, baseW = 0, baseH = 0, pitch = 0, setW = 0;
+    var W = 0, H = 0, baseW = 0, baseH = 0, pitch = 0, setW = 0, botBase = 0;
 
     // 圆柱内壁：卡片在中间最矮最正，越靠两侧越高，且外缘比内缘更高 → 整张卡倾斜。
     // 参数是从参考图逐卡量出来的：高度增幅 ~1.37、指数 ~3.3、宽度几乎不变、间距恒定。
@@ -210,12 +210,18 @@
     var GROW_W = 0.12;   // 边缘卡片宽度增幅（参考图几乎不放大，只靠高度出弧）
     var BOW_X = 0.02;    // 水平外扩，几乎不用，靠间距本身撑开
     var GAP = 1.11;      // 卡片间距 / 卡宽，参考图约 1.11，压紧才像"墙"
+    // 卡片不按中心对齐，而是站在同一条基线上。
+    // 按中心对齐时，带高是按最高的边卡算的，中间那批矮卡上下各空出 18%，
+    // 屏幕底部就露出一整条 80 多 px 的黑带（视频底本来就暗），看着像个黑框。
+    // 底部对齐之后空档全跑到上方，被标题和遮罩盖住。留 0.2 的倾斜，
+    // 让底边也跟着弧面微微上翘，不然底边会太平、像贴了一排瓷砖。
+    var BOT_TILT = 0.2;
 
     function measure() {
       W = rail.clientWidth;
       H = rail.clientHeight;
-      // 最外侧高度 = baseH*(1+GROW_H) 必须留在 rail 内，留 3% 余量
-      baseH = (H * 0.94) / (1 + GROW_H);
+      baseH = H * 0.62;
+      botBase = H * 0.985;
       baseW = baseH * 0.615;
       pitch = baseW * GAP;
       // 一圈至少要盖满一屏，否则首尾接缝会露空
@@ -299,7 +305,7 @@
         while (offset > 0) offset -= setW;
       }
 
-      var cx = W / 2, half = W / 2, cyBase = H * 0.5;
+      var cx = W / 2, half = W / 2;
 
       for (var i = 0; i < cards.length; i++) {
         var el = cards[i];
@@ -322,9 +328,10 @@
         var hL = baseH * (1 + GROW_H * Math.pow(qL, POW_H));
         var hR = baseH * (1 + GROW_H * Math.pow(qR, POW_H));
 
-        var cy = cyBase;
-        var y1L = cy - hL / 2, y2L = cy + hL / 2;
-        var y1R = cy - hR / 2, y2R = cy + hR / 2;
+        // 底边落在同一条基线上，只有一点倾斜；顶边随高度自然上翘 → 弧面还在，底部不再留空
+        var y2L = botBase - (hL - baseH) * BOT_TILT;
+        var y2R = botBase - (hR - baseH) * BOT_TILT;
+        var y1L = y2L - hL, y1R = y2R - hR;
         var top = Math.min(y1L, y1R), bot = Math.max(y2L, y2R);
 
         el.style.left = (x - w / 2).toFixed(1) + 'px';
