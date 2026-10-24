@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>软件 — Sober BW</title>
+<meta name="description" content="尤博文开发的视频生产工具：封面点击欲测试、声音克隆与配音工作台、素材管理。">
+<meta property="og:title" content="软件 — Sober BW">
+<meta property="og:description" content="尤博文开发的视频生产工具：封面点击欲测试、声音克隆与配音工作台、素材管理。">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts/harmonyos/Regular.css">
+<link rel="stylesheet" href="fonts/harmonyos/Medium.css">
+<link rel="stylesheet" href="fonts/harmonyos/Semibold.css">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body class="inner">
+<svg class="defs" aria-hidden="true"><defs>
+  <filter id="bw" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="13"/></filter>
+  <filter id="bc" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="15"/></filter>
+  <filter id="bg" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="11"/></filter>
+  <filter id="hb" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
+  <filter id="hb2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="52"/></filter>
+  <filter id="gr"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"/><feColorMatrix type="saturate" values="0"/></filter>
+  <radialGradient id="vw" cx="42%" cy="40%" r="72%"><stop offset=".38" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".72"/></radialGradient>
+  <radialGradient id="vc" cx="56%" cy="46%" r="72%"><stop offset=".38" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".76"/></radialGradient>
+  <radialGradient id="vg" cx="50%" cy="50%" r="74%"><stop offset=".38" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+  <linearGradient id="hsky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1A1710"/><stop offset=".26" stop-color="#4A3E28"/>
+    <stop offset=".43" stop-color="#A88A54"/><stop offset=".52" stop-color="#E2C185"/>
+    <stop offset=".61" stop-color="#8A6E42"/><stop offset=".74" stop-color="#2A2318"/>
+    <stop offset="1" stop-color="#0C0B08"/>
+  </linearGradient>
+  <radialGradient id="hsun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFF0C8" stop-opacity=".95"/><stop offset=".45" stop-color="#F0C078" stop-opacity=".5"/><stop offset="1" stop-color="#F0C078" stop-opacity="0"/></radialGradient>
+  <radialGradient id="hvg" cx="50%" cy="44%" r="76%"><stop offset=".4" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".86"/></radialGradient>
+</defs></svg>
+<header class="topbar">
+    <div class="in">
+      <a class="mark" href="index.html">Sober BW<span>尤博文</span></a>
+      <nav>
+        <a href="work.html">作品</a>
+        <a href="resume.html">简历</a>
+        <a href="tools.html" aria-current="page">软件</a>
+        <a href="contact.html">联系</a>
+      </nav>
+    </div>
+  </header>
+<main class="wrap tools-page">
+  <div class="sec-head">
+    <div>
+      <div class="count">SOFTWARE · 5 个公开仓库</div>
+      <h1>软件</h1>
+    </div>
+    <p>拍片时被卡住的地方，后来都变成了软件。它们不是另一个身份，是同一条工作流的另一端：判断封面点击欲、把录音变成文字稿、管住散在十个文件夹里的素材。</p>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:22%">名称</th><th>解决什么</th><th style="width:13%">技术</th><th style="width:11%">更新</th><th style="width:8%">链接</th></tr></thead>
+    <tbody>
+      <tr><td class="n">bilibili-cover-preview</td><td>把封面放进近似 B 站首页和手机端推荐流里，判断它值不值得被点开。</td><td class="s">纯静态</td><td class="s">2026.08</td><td class="l"><a href="#">Demo</a></td></tr>
+      <tr><td class="n">声作<em>shengzuo</em></td><td>Windows 本地声音克隆、长稿配音与多人脚本工作台。</td><td class="s">TypeScript</td><td class="s">2026.08</td><td class="l"><a href="#">GitHub</a></td></tr>
+      <tr><td class="n">Weave</td><td>本地创作素材管理与制作工作台——素材散在十个文件夹里，需要一个地方记住它们。</td><td class="s">TypeScript</td><td class="s">2026.10</td><td class="l"><a href="#">GitHub</a></td></tr>
+      <tr><td class="n">WinGlow</td><td>让 Windows 更好看、更好用：字体、右键菜单、任务栏、窗口与开始菜单，改前备份、一键还原。</td><td class="s">Rust</td><td class="s">2026.10</td><td class="l"><a href="#">GitHub</a></td></tr>
+      <tr><td class="n">WinEase</td><td>极简 Windows 工具箱：清理、空间管理、应用管理与常用系统设置。</td><td class="s">Rust</td><td class="s">2026.10</td><td class="l"><a href="#">GitHub</a></td></tr>
+    </tbody>
+  </table>
+
+  <section class="tools-note">
+    <p>GitHub 上另有 6 个公开仓库，时间跨度 2026.08–2026.10，全部围绕视频生产。其中 bilibili-cover-preview 有在线 Demo，可以直接把封面丢进推荐流里看效果。</p>
+  </section>
+</main>
+<footer class="wrap">
+    <span>Sober BW · 尤博文 · <a href="https://soberbw.cn">soberbw.cn</a></span>
+    <span>画面为抽象占位，待替换为原片剧照</span>
+  </footer>
+</body>
+</html>
