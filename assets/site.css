@@ -521,11 +521,28 @@ body.dark{background:#0B0F12}
   position:absolute;left:clamp(20px,11vw,196px);top:clamp(84px,15.5vh,160px);z-index:6;
   max-width:min(92vw,860px);
 }
+/* 名字用思源宋 Black。只子集了「尤博文」三个字，1.4KB——
+   中文展示字体动辄十几兆，但这里只排三个字，没必要把整副字库搬上来。
+   宋体的横细竖粗和三角衬角，比黑体更像「写出来的」，不是排版软件默认值。 */
+@font-face{
+  font-family:'Site Serif';
+  src:url('../fonts/display/serif-name-900.woff2') format('woff2');
+  font-weight:900;font-style:normal;font-display:swap;
+}
+/* 「不用这么正」落在三处，都不靠扭字形：
+   1. 收紧字距 -.045em —— 宋体 Black 笔画粗，松排是三个独立的字，收紧才咬成一块墨；
+   2. 左缘负 -.03em 做视觉对齐 —— 「尤」的左撇会探出字面框，不补这一下左边缘是虚的；
+   3. 三层贴近的暗边 —— 横画细，背后又是视频亮部，只给一层大柔光会被吃掉。 */
 .sc-hero h1{
-  font-size:clamp(56px,9.8vw,148px);
-  font-weight:600;line-height:1;letter-spacing:-.045em;
+  font-family:'Site Serif','Noto Serif SC','Songti SC',serif;
+  font-size:clamp(66px,11.8vw,208px);
+  font-weight:900;line-height:1.02;
+  letter-spacing:-.045em;margin-left:-.03em;
   color:#FAFAF7;
-  text-shadow:0 2px 46px rgba(10,14,18,.4);
+  text-shadow:
+    0 1px 0 rgba(8,11,14,.30),
+    0 2px 10px rgba(8,11,14,.34),
+    0 14px 48px rgba(8,11,14,.36);
 }
 
 /* ---------- 标题悬停：一层跟着光标走的柔光，把字里的金绿渐变擦出来 ----------
@@ -553,20 +570,26 @@ body.dark{background:#0B0F12}
 @supports not ((-webkit-background-clip:text) or (background-clip:text)){
   .sc-t-lit{display:none}
 }
+/* 英文行不跟名字抢：Portfolio 压成一条小号宽字距的标签，右边接手写签名。
+   字号差三倍是故意的——签名是「人」的痕迹，标签只是分类。 */
 .sc-en{
-  display:flex;align-items:flex-end;gap:clamp(10px,1.6vw,24px);
-  margin-top:clamp(0px,.4vh,6px);
+  display:flex;align-items:baseline;gap:clamp(12px,1.8vw,26px);
+  margin-top:clamp(4px,.9vh,14px);margin-left:-.03em;
 }
 .sc-en .en{
-  font-size:clamp(28px,5vw,78px);
-  font-weight:600;line-height:1;letter-spacing:.01em;
-  color:rgba(250,250,247,.92);
+  font-size:clamp(9.5px,.8vw,11.5px);
+  font-weight:500;line-height:1;
+  /* 字距加在每个字后面，末字也会多出一截——用负右外边距收掉，
+     不能拿 text-indent 顶，那会把整行往右推，左缘就和名字对不齐了 */
+  letter-spacing:.5em;margin-right:-.5em;
+  color:rgba(250,250,247,.52);
 }
 .sc-en .sig{
   font-family:'Caveat',cursive;
-  font-size:clamp(24px,3.1vw,48px);
+  font-size:clamp(21px,2.3vw,36px);
   line-height:1;color:var(--lime);
-  transform:rotate(-6deg) translateY(-.16em);
+  /* 签名不要压到 Portfolio：右移一点、抬一点，落在名字右下角的空档里 */
+  transform:rotate(-6deg) translate(.12em,-.08em);
   text-shadow:0 0 26px rgba(198,240,74,.3);
   white-space:nowrap;
 }
@@ -575,6 +598,8 @@ body.dark{background:#0B0F12}
   font-size:clamp(13.5px,1.06vw,15.5px);
   line-height:1.72;color:rgba(252,252,249,.9);
   letter-spacing:.012em;
+  /* 窄屏别让最后一行只剩两三个字 */
+  text-wrap:pretty;
 }
 
 /* ---------- 底部卡片带：圆柱内壁弧形（几何全部由 JS 逐帧计算） ---------- */
@@ -650,11 +675,11 @@ body.dark{background:#0B0F12}
   .sc-links{gap:13px;font-size:12.5px}
   .sc-pill{height:34px;padding:0 14px;font-size:12px;letter-spacing:.1em}
   .sc-hero{left:20px;right:20px;top:clamp(92px,19vh,160px);max-width:none}
-  .sc-hero h1{font-size:clamp(50px,15vw,84px)}
-  .sc-en{gap:10px}
-  .sc-en .en{font-size:clamp(24px,7.6vw,42px)}
-  .sc-en .sig{font-size:clamp(20px,5.4vw,30px)}
-  .sc-sub{font-size:13px;line-height:1.7;max-width:100%}
+  .sc-hero h1{font-size:clamp(86px,22vw,140px)}
+  .sc-en{gap:clamp(11px,3vw,18px);margin-left:-.03em;margin-top:12px}
+  .sc-en .en{font-size:clamp(10px,2.6vw,11.5px);letter-spacing:.4em;margin-right:-.4em}
+  .sc-en .sig{font-size:clamp(19px,5vw,28px)}
+  .sc-sub{font-size:13px;line-height:1.7;max-width:100%;margin-top:clamp(12px,2vh,26px)}
   .sc-rail{height:clamp(210px,31vh,300px);bottom:clamp(26px,4.2vh,44px)}
   .sc-card .cap{left:9px;right:9px;bottom:10px}
   .sc-card .cap b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1180,9 +1205,6 @@ body.dt-page>main{width:100%;padding-top:0}
 .sc-card:hover .art img{transform:scale(1.06)}
 .sc-card .cap{transition:transform .45s var(--ease)}
 .sc-card:hover .cap{transform:translateY(-3px)}
-
-/* 签名不要压到 PORTFOLIO */
-.sc-en .sig{transform:rotate(-6deg) translate(.12em,-.08em)}
 
 /* ---------- 软件页：统一 2:1，GitHub 卡片和截图都不被裁歪 ---------- */
 .tool-shot img{object-position:top center}
