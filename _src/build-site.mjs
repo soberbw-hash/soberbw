@@ -637,7 +637,7 @@ const indexBody = `<main class="sc-stage">
 
   <div class="sc-hero">
     <div class="sc-hero-in">
-      <p class="sc-kicker" data-tilt="6">短片导演 / 剪辑</p>
+      <p class="sc-kicker" data-tilt="6">短片导演 / 摄影师</p>
       <h1 class="sc-title" data-tilt="14">
         <span class="sc-t-b">尤博文</span>
         <span class="sc-t-lit" aria-hidden="true">尤博文</span>
