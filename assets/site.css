@@ -540,8 +540,12 @@ body.dark{background:#0B0F12}
 }
 /* 780 是「一行五十来字」的可读上限。简介那三行最长一句 51em，
    框给到 820 是为了让它在 15px 上还留 7% 余量——正文本身比框短，
-   放宽框宽不会让字变宽，只是不让它被框卡着折。 */
-.sc-hero-in{max-width:min(100%,820px)}
+   放宽框宽不会让字变宽，只是不让它被框卡着折。
+
+   这个上限只给简介，不给整栏：名字是 inline-block，会被父级宽度卡住而折行。
+   宋体的「尤博文」比行书宽 8%，1920 下 864px，超过 820 就断成「尤博」+「文」。
+   简介自己带 max-width，父级放开即可。 */
+.sc-hero-in{max-width:100%}
 /* 文字背后单独压一小片暗场。
    全局那层 .sc-veil 是从左往右淡出的（0.62 → 62% 处归零），到正文右端只剩
    一成多一点——片子里那块亮雾一飘过来，后半行白字就只剩 3:1 左右，读得很吃力。
@@ -568,28 +572,37 @@ body.dark{background:#0B0F12}
   width:clamp(18px,2.4vw,34px);height:1px;
   background:rgba(198,240,74,.62);
 }
-/* 名字用手写行书（志莽行书）。只子集了「尤博文」三个字，1.6KB——
+/* 名字用思源宋体 800（Noto Serif SC）。只子集了「尤博文」三个字，1.3KB——
    中文展示字体动辄十几兆，但这里只排三个字，没必要把整副字库搬上来。
 
-   为什么不是宋体/黑体：印刷体的横平竖直就是「规矩」本身，怎么调字距都还是排版软件
-   的默认值。行书三个字天然大小错落、重心不齐，「不正」是字形自带的，不是扭出来的。
-   代价是「博」写得比较草——但整句在上下文里仍能读出来，这个交换划算。
+   为什么从手写行书换过来：
+   行书那版的问题不是「不够艺术」，是「不够可信」。三个字大小不齐、重心各异，
+   在 216px 上放大之后，第一眼像签名草稿而不是名字；「博」写得尤其草，
+   得靠上下文才认得出。简历网站的第一屏就是这行字，认不出来就是失职。
 
-   行书只有 400 一个字重，绝不能让它被合成加粗：伪粗体会把飞白和连笔糊死，
-   所以显式写 font-weight:400 + font-synthesis:none。 */
+   现在换成高对比的宋体黑字重，读起来像电影片头或杂志封面：
+   横细竖粗、有衬线，在照片背景上站得住，也不跟下面那行手写签名抢戏——
+   之前两处都是手写，谁也不比谁特别。
+
+   800 而不是 900：900 在大字号上有点「钝」，横画压得太实，
+   在明暗交错的云层上容易糊成一块；800 还留着笔画的对比。
+
+   字重写死 400（字体文件里已经是 800 的轮廓），并且 font-synthesis:none：
+   浏览器一旦合成加粗，宋体的细横会被糊粗，高对比全没了。 */
 @font-face{
-  font-family:'Site Brush';
-  src:url('../fonts/display/brush-name.woff2') format('woff2');
+  font-family:'Site Display';
+  src:url('../fonts/display/serif-name-800.woff2') format('woff2');
   font-weight:400;font-style:normal;font-display:swap;
 }
 .sc-hero h1{
-  font-family:'Site Brush','Ma Shan Zheng','Noto Serif SC','Songti SC',serif;
+  font-family:'Site Display','Noto Serif SC','Songti SC','Source Han Serif SC',serif;
   font-size:clamp(70px,15vw,300px);
   font-weight:400;font-synthesis:none;
   line-height:1.04;
-  /* 行书自带字距和重心，收紧会撞、放开会散，给一点呼吸就够；
-     左缘负 .04em 是补「尤」那一撇的拖尾，不补左边缘就和正文对不齐 */
-  letter-spacing:.012em;margin-left:-.04em;
+  /* 宋体本身是满格的方块字，字距放到 0 就已经很紧；再负会撞。
+     左缘不再补负边距：行书那 -.04em 是为了让「尤」的撇尖顶到左边缘，
+     宋体的「尤」是方方正正的，补了反而缩进。 */
+  letter-spacing:0;
   color:#FAFAF7;
   text-shadow:
     0 1px 0 rgba(8,11,14,.26),
@@ -602,7 +615,9 @@ body.dark{background:#0B0F12}
    遮罩半径用 @property 注册成可过渡的长度，所以是「扩散」而不是「闪现」。 */
 @property --sc-r{syntax:'<length>';inherits:false;initial-value:0px}
 
-.sc-title{position:relative;display:inline-block}
+/* 三个字，永远不许折行。父级宽度不够时宁可溢出，也不能断成两行——
+   名字断行在首页上等于把版面撕开。 */
+.sc-title{position:relative;display:inline-block;white-space:nowrap}
 .sc-t-b{display:block}
 .sc-t-lit{
   position:absolute;inset:0;display:block;
@@ -985,7 +1000,7 @@ body.dt-page>main{width:100%;padding-top:0}
 .sc-sub{
   margin-top:clamp(20px,3vh,34px);
   list-style:none;
-  max-width:none;
+  max-width:min(100%,820px);
   font-size:clamp(12.5px,1vw,15px);
   line-height:1.72;color:rgba(252,252,249,.9);
   text-shadow:0 1px 20px rgba(6,10,14,.62);
