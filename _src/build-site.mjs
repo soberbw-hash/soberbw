@@ -671,6 +671,43 @@ function detailBody(w, i) {
   const idx = String(i + 1).padStart(2, '0');
   // 详情页顶部可以另配一张：卡片要抢眼，详情页要能讲事
   const cover = `img/work/${w.hero || coverOf(w)}.jpg`;
+  /* 画廊里每一张的「权限」按源图真实尺寸给，不按心情。
+     原来这里有一条无条件的 `figure:last-child:nth-child(odd){grid-column:span 2}`：
+     只要张数是奇数，最后一张就被拉到 1330px——可《女书回响》的剧照只有 714px 宽，
+     等于放大 1.86 倍，糊是必然的。现在按测量结果分三类：
+
+     · 横向且 ≥1200px → 通栏。1330px 下才放大 1.11 倍，看不出来。
+     · 竖向（h > w）→ 通栏居中、压到 360px 宽，比例用原图的。
+       两张抖音封面是竖版带大标题字的，硬裁成 2:1 会把标题和脸一起切掉。
+     · 其余 → 半栏，660px。800px 的源图正好缩到 0.8 倍，只会更锐。 */
+  const shots = w.imgs
+    .filter((n) => n !== coverOf(w) && n !== w.hero)
+    .map((n) => ({ n, dim: jpegSize(join(ROOT, 'img/work', `${n}.jpg`)) }));
+
+  /* 一部作品只给一次通栏，而且给最大的那张。
+     全给通栏的话，五张一样大的长条一路排下去，和「六张一样大的小卡」是同一种
+     单调，只是换了个尺寸。一次通栏 + 后面两两并排，节奏才立得住。
+     把最大的那张挪到最前面，是为了让通栏落在第一行：留在中间的话，跨两列的
+     那张会在右半格挤不下去，被整体推到下一行，前面空出一个 660×330 的洞。
+     挪一张图的顺序，换来整页不留洞，划算。 */
+  let wideAt = -1;
+  shots.forEach((s, k) => {
+    if (!s.dim || s.dim.h > s.dim.w || s.dim.w < 1200) return;
+    if (wideAt < 0 || s.dim.w > shots[wideAt].dim.w) wideAt = k;
+  });
+  if (wideAt > 0) shots.unshift(...shots.splice(wideAt, 1));
+
+  const gallery = shots.map(({ n, dim }, k) => {
+    let attr = '';
+    if (k === 0 && wideAt >= 0) {
+      attr = ' class="is-wide"';
+    } else if (dim && dim.h > dim.w) {
+      /* 比例写在行内，是为了让占位高度一次算对——不然懒加载时图一进来整页往下跳。 */
+      attr = ` class="is-tall" style="aspect-ratio:${dim.w}/${dim.h}"`;
+    }
+    return `<figure${attr}><img src="../img/work/${n}.jpg" alt="${w.title} 剧照 ${k + 2}" loading="lazy"></figure>`;
+  });
+
   return `<main class="dt">
   <section class="dt-hero${w.v ? ' is-v' : ''}">
     <div class="dt-top wrap">
@@ -683,15 +720,22 @@ function detailBody(w, i) {
         <div class="dt-kind">${w.kind}${w.year === '未记录' ? '' : ` · ${w.year}`}</div>
         <h1>${w.title}</h1>
         <p class="dt-lead">${w.lead}</p>
-        <dl class="dt-quick">
-          <div><dt>身份</dt><dd>${w.role}</dd></div>
-          <div><dt>发布</dt><dd>${w.platform}</dd></div>
-        </dl>
-        ${w.href ? `<a class="dt-cta" href="${w.href}" target="_blank" rel="noopener">在${w.hrefLabel}观看 <span>↗</span></a>` : ''}
       </div>
       <figure class="dt-shot">
         <div class="dt-shot-in"><img src="../${cover}" alt="${w.title} 剧照"></div>
       </figure>
+    </div>
+
+    ${/* 身份 / 发布 / 年份 / 观看入口原来挤在标题下面那一小坨 dl 里，
+         跟标题抢同一块注意力。挪到首屏底部、拉成一条横贯的credits带：
+         像片尾字幕那样一行一件事，标题就彻底空出来了。 */ ''}
+    <div class="dt-credits wrap">
+      <dl>
+        <div><dt>身份</dt><dd>${w.role}</dd></div>
+        <div><dt>发布</dt><dd>${w.platform}</dd></div>
+        ${w.year && w.year !== '未记录' ? `<div><dt>年份</dt><dd>${w.year}</dd></div>` : ''}
+      </dl>
+      ${w.href ? `<a class="dt-cta" href="${w.href}" target="_blank" rel="noopener">在${w.hrefLabel}观看 <span>↗</span></a>` : ''}
     </div>
   </section>
 
@@ -701,16 +745,20 @@ function detailBody(w, i) {
       ${w.body.map((t) => `<p>${t}</p>`).join('\n      ')}
     </div>
     <div class="dt-gallery">
-      ${w.imgs.filter((n) => n !== coverOf(w) && n !== w.hero).map((n, k) => `<figure><img src="../img/work/${n}.jpg" alt="${w.title} 剧照 ${k + 2}" loading="lazy"></figure>`).join('\n      ')}
+      ${gallery.join('\n      ')}
     </div>
   </section>
 
+  ${/* 上一部 / 下一部。原来两边都是两行小字，读到页尾就没气了。
+         现在「下一部」带一张封面——它是这一页最后看到的东西，
+         应该是一张画面，而不是一行链接。 */ ''}
   <nav class="dt-nav wrap" aria-label="作品切换">
     <a class="dt-prev" href="${prev.slug}.html">
       <span>← 上一部</span>
       <b>${prev.short || prev.title}</b>
     </a>
     <a class="dt-next" href="${next.slug}.html">
+      <figure><img src="../img/work/${next.rail || next.hero || coverOf(next)}.jpg" alt="" loading="lazy"></figure>
       <span>下一部 →</span>
       <b>${next.short || next.title}</b>
     </a>

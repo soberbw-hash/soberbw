@@ -661,14 +661,29 @@ body.dt-page>main{width:100%;padding-top:0}
   color:#A9A499;max-width:30em;
 }
 
-.dt-quick{
-  margin-top:clamp(28px,4.6vh,52px);
-  display:grid;grid-template-columns:repeat(3,auto);gap:clamp(20px,3vw,44px);
-  justify-content:start;
-  border-top:1px solid var(--rule-l);padding-top:16px;
+/* 身份 / 发布 / 年份 + 观看入口，拉成一条横贯首屏底部的 credits 带。
+   原来这四样挤在标题下面一小坨 dl 里，跟标题抢同一块注意力；
+   现在挪到首屏底部，像片尾字幕那样一行一件事，标题就彻底空出来了。
+
+   为什么用 space-between 而不是均分：左边是「谁做的」，右边是「去哪看」，
+   两件事性质不同，中间留白本身就是分隔线，比再画一条竖线干净。 */
+.dt-credits{
+  width:100%;
+  /* 竖版作品（智云 / X100）的 9:16 画面高 501px，正好把 .dt-main 撑满，
+     不留 margin 的话画面底边会贴着这条横线，看着像压上去了。 */
+  margin-top:clamp(16px,2.6vh,32px);
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+  gap:clamp(16px,2.6vw,40px);
+  border-top:1px solid var(--rule-l);
+  padding-top:clamp(16px,2.4vh,24px);
 }
-.dt-quick dt{font-size:11px;letter-spacing:.1em;color:#6E6A60;margin-bottom:6px}
-.dt-quick dd{font-size:13.5px;color:var(--ink-l);line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dt-credits dl{display:flex;flex-wrap:wrap;gap:clamp(18px,3.4vw,56px);margin:0}
+.dt-credits dl>div{min-width:0}
+.dt-credits dt{font-size:11px;letter-spacing:.1em;color:#6E6A60;margin-bottom:7px}
+.dt-credits dd{
+  margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-l);
+  font-variant-numeric:tabular-nums;
+}
 
 /* 画面卡 */
 .dt-shot{margin:0;min-width:0}
@@ -693,9 +708,33 @@ body.dt-page>main{width:100%;padding-top:0}
   padding-top:clamp(48px,8vh,96px);padding-bottom:clamp(44px,7vh,80px);
   max-width:1600px;
 }
-.dt-text{max-width:44em}
-.dt-text .label{font-size:11.5px;letter-spacing:.1em;color:var(--ink-d3);margin-bottom:16px}
-.dt-text p{font-size:clamp(14.5px,1.12vw,16.5px);line-height:2.1;color:#3A3931;margin-bottom:1.05em}
+/* 「关于」这一段原来是顶格一大坨：一个小标签 + 三行一样大的字，左边排到 700px
+   就停，右边 600 多像素全是空的。改两件事：
+
+   1. 标签挪到左边距里当书眉（像书里那种侧栏小标），正文另起一列。
+      原来标签和正文同列，读起来是「关于 / 然后一堆字」，现在是「关于 │ 一堆字」，
+      左边缘立刻立起来了。
+   2. 第一段提一档当导语。三行一样大的字没有入口，读者不知道从哪儿开始看；
+      第一行大一号，眼睛就有着落。
+
+   正文宽度按中文的舒服区间卡在 700px 上下（一行 40 来字），不是按 44em 算的
+   ——em 跟着元素自身字号走，字号一变宽度就跟着飘，之前首页简介折行折得莫名其妙
+   就是这个原因。 */
+.dt-text{
+  display:grid;
+  grid-template-columns:clamp(56px,6.4vw,96px) minmax(0,1fr);
+  gap:clamp(14px,2.6vw,36px);
+  max-width:54em;
+}
+.dt-text .label{
+  grid-column:1;margin:0;padding-top:.55em;
+  font-size:11.5px;letter-spacing:.1em;color:var(--ink-d3);
+}
+.dt-text p{grid-column:2;font-size:clamp(14.5px,1.12vw,16.5px);line-height:1.92;color:#3A3931;margin-bottom:.95em}
+.dt-text p:first-of-type{
+  font-size:clamp(16.5px,1.42vw,21px);line-height:1.8;
+  color:#23221D;letter-spacing:-.004em;margin-bottom:1.05em;
+}
 .dt-text p:last-child{margin-bottom:0}
 
 /* ---------- 上一部 / 下一部 ---------- */
@@ -706,10 +745,23 @@ body.dt-page>main{width:100%;padding-top:0}
   padding-top:clamp(22px,3.4vh,34px);padding-bottom:clamp(52px,9vh,110px);
   max-width:1600px;
 }
-.dt-nav a{display:block}
+.dt-nav a{display:flex;flex-direction:column}
+/* 左边只有两行字，右边多了一张封面，两格高度就不一样了。
+   让左边贴底对齐，两边的标题才会落在同一条基线上，看着是「并排」而不是「错位」。 */
+.dt-prev{justify-content:flex-end}
 .dt-nav span{display:block;font-size:11.5px;letter-spacing:.1em;color:var(--ink-d3);margin-bottom:9px;transition:color .25s}
 .dt-nav b{display:block;font-weight:500;font-size:clamp(15px,1.35vw,20px);line-height:1.4;transition:color .25s}
-.dt-next{text-align:right}
+.dt-next{text-align:right;align-items:flex-end}
+/* 「下一部」带一张封面。原来两边都只是两行小字，读到页尾就没气了；
+   这一页最后看到的东西应该是一张画面。 */
+.dt-next figure{
+  width:clamp(150px,15vw,224px);aspect-ratio:2/1;
+  margin:0 0 clamp(13px,2vh,20px);
+  overflow:hidden;background:#141813;
+  border:1px solid var(--rule-d);
+}
+.dt-next figure img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s var(--ease)}
+.dt-next:hover figure img{transform:scale(1.05)}
 .dt-nav a:hover b{color:var(--accent)}
 .dt-nav a:hover span{color:var(--ink-d2)}
 
@@ -718,15 +770,23 @@ body.dt-page>main{width:100%;padding-top:0}
   .dt-shot{order:-1}
   .dt-hero.is-v .dt-shot{max-width:min(300px,70%);margin-left:0}
   .dt-info h1{max-width:none}
-  .dt-quick{grid-template-columns:repeat(3,auto);gap:clamp(16px,4vw,28px)}
   .dt-shot figcaption{text-align:left}
 }
 @media (max-width:560px){
   .dt-hero{min-height:auto;padding-bottom:clamp(34px,6vh,52px)}
-  .dt-quick{grid-template-columns:1fr 1fr;gap:16px 20px}
-  .dt-quick dd{white-space:normal}
+  /* credits 带在窄屏改成竖着叠：三组字横排在 390px 上必然折成一团。 */
+  .dt-credits{flex-direction:column;align-items:flex-start}
+  .dt-credits dl{gap:14px 28px}
+  /* 左边距只剩 390px，书眉挤不进边栏了，回到「标签在上、正文在下」。
+     必须把 grid-column 一起重置回 1：留着 2 的话网格会多长出一条隐式列。 */
+  .dt-text{grid-template-columns:1fr;gap:0}
+  .dt-text .label,.dt-text p{grid-column:1}
+  .dt-text .label{padding-top:0;margin-bottom:14px}
+  /* 单列之后「通栏」已经没意义，竖版那两张也该跟着放大：
+     64% 在 390px 上只剩 224px，一张竖版封面缩成小邮票，看不清标题字。 */
+  .dt-gallery figure.is-tall{width:min(320px,86%)}
   .dt-nav{grid-template-columns:1fr;gap:22px}
-  .dt-next{text-align:left}
+  .dt-next{text-align:left;align-items:flex-start}
 }
 
 @media (max-width:760px){
@@ -809,14 +869,40 @@ body.dt-page>main{width:100%;padding-top:0}
 /* 列表页标题区只留标题 */
 .sec-head{grid-template-columns:1fr;align-items:start;margin-bottom:clamp(22px,3.2vh,38px)}
 
+/* ---------- 二级页的页头：标题要压得住场 ----------
+   原来三个二级页的标题都是 clamp(24px,2.6vw,40px)，1440 下 37px。
+   同一页里卡片标题 19px、正文 16px，37px 只比它们大一倍多一点——
+   一进页面眼睛不知道该落在哪。详情页的标题是 78px，一对比就看出二级页太怯。
+
+   标题提到 76px 上下，跟详情页同一个量级；简介在软件页挪到右栏贴底，
+   左边空出来的那 850px 才有着落（详见 .tools-page .sec-head）。 */
+.list-page .sec-head h1,
+.contact-page .sec-head h1{font-size:clamp(34px,5vw,76px);line-height:1.06;letter-spacing:-.03em}
+
+.tools-page .sec-head{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.62fr);
+  gap:clamp(20px,4vw,64px);align-items:end;
+}
+.tools-page .sec-head h1{font-size:clamp(34px,5.4vw,84px);line-height:1.05;letter-spacing:-.03em}
+/* 简介原来挤在标题正下方 476px 宽的窄栏里，14px，右边 850px 全空。
+   挪到右栏、贴底、上面加一条细线——像杂志目录页右边那段导语。 */
+.tools-page .sec-head p{
+  max-width:30em;
+  font-size:clamp(13.5px,1.05vw,15.5px);line-height:1.95;
+  padding-top:clamp(12px,2vh,18px);
+  border-top:1px solid var(--rule-d);
+}
+
 /* ---------- 详情页：剧照墙 + 外链按钮 ---------- */
 .dt-shot-in img{width:100%;height:100%;object-fit:cover;display:block}
+/* 带子的 margin-top 归零：它现在挂在 .dt-credits 里，跟左边那几行字底对齐，
+   再挂一个 margin-top 就会被 flex 的 align-items:flex-end 顶上去，对不齐。 */
 .dt-cta{
   display:inline-flex;align-items:center;gap:8px;
-  margin-top:clamp(22px,3.4vh,36px);
   padding:11px 20px;border-radius:999px;
   background:var(--gold);color:#141210;
   font-size:13px;font-weight:500;letter-spacing:.02em;
+  white-space:nowrap;
   transition:background .3s,transform .3s,color .3s;
 }
 .dt-cta span{font-size:12px;opacity:.7}
@@ -826,12 +912,20 @@ body.dt-page>main{width:100%;padding-top:0}
   margin-top:clamp(38px,6vh,72px);
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:clamp(10px,1.3vw,18px);
+  /* dense：通栏那张（跨两列）如果正好落在右半格，默认会被整体推到下一行，
+     在它前面留一个 660×330 的空洞。dense 让后面的半栏图回头把这个洞补上。
+     代价是视觉顺序可能和 DOM 差一位——画廊里的图没有编号，看不出差别。 */
+  grid-auto-flow:row dense;
 }
 .dt-gallery figure{margin:0;overflow:hidden;background:#141813;aspect-ratio:2/1}
 .dt-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s var(--ease)}
 .dt-gallery figure:hover img{transform:scale(1.04)}
-.dt-hero.is-v .dt-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}
-.dt-hero.is-v .dt-gallery figure{aspect-ratio:9/16}
+
+/* 通栏：只有源图 ≥1200px 的横向剧照才配。九部里只有两张够格。 */
+.dt-gallery figure.is-wide{grid-column:1/-1}
+/* 竖版（两张抖音封面）：保持原比例，压到 360px 居中。
+   这两张自带大字标题，裁成 2:1 会把标题和脸一起切掉。 */
+.dt-gallery figure.is-tall{grid-column:1/-1;justify-self:center;width:min(360px,64%)}
 .dt-body{max-width:1600px}
 
 /* ============================================================
@@ -844,7 +938,7 @@ body.dt-page>main{width:100%;padding-top:0}
   border-bottom:1px solid var(--rule-d);
 }
 .rs-name h1{
-  font-weight:600;font-size:clamp(34px,4.4vw,62px);
+  font-weight:600;font-size:clamp(34px,5vw,76px);
   line-height:1.08;letter-spacing:-.025em;
 }
 .rs-meta{
@@ -1278,6 +1372,7 @@ body.dt-page>main{width:100%;padding-top:0}
   #exp-3:checked~.exp-list label[for="exp-3"]{border-left-color:transparent;border-top-color:var(--ink-d)}
   .skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ct-grid{grid-template-columns:1fr;gap:12px}
+  .tools-page .sec-head{grid-template-columns:1fr;gap:clamp(14px,3vw,22px)}
   .dt-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:560px){
@@ -1287,7 +1382,6 @@ body.dt-page>main{width:100%;padding-top:0}
   .ticks li{grid-template-columns:1fr;gap:6px}
   .kpi{justify-self:start}
   .dt-gallery{grid-template-columns:1fr}
-  .dt-gallery figure:last-child:nth-child(odd){grid-column:span 1}
 }
 
 /* ---------- 抽牌：带一点回弹，才像被抽出来 ----------
@@ -1318,16 +1412,14 @@ body.inner .contact-page .sec-head{margin-bottom:clamp(28px,4.4vh,48px)}
 .ct-links a span{color:var(--ink-d3)}
 .ct-links a:hover span{color:var(--ink-d2)}
 
-/* 剧照墙：图已统一裁到 2:1，容器同比例 → 零裁切，完整呈现 */
-.dt-gallery figure{aspect-ratio:2/1}
-/* 5 张时最后一张跨两列收尾，正好填满，不留豁口 */
-.dt-gallery figure:last-child:nth-child(odd){grid-column:span 2}
-.dt-hero.is-v .dt-gallery figure{aspect-ratio:9/16}
-.dt-hero.is-v .dt-gallery figure:last-child:nth-child(odd){grid-column:span 1}
-@media (max-width:960px){
-  .dt-gallery figure{aspect-ratio:2/1}
-  .dt-gallery figure:last-child:nth-child(odd){grid-column:span 2}
-}
+/* 剧照墙的尺寸规则统一在上面的 `.dt-gallery` 那一段里，这里不再重复。
+   原来这一块挂着一条 `figure:last-child:nth-child(odd){grid-column:span 2}`
+   （外加 960px 断点里同样的一条），意图是「张数是奇数时最后一张跨两列收尾，
+   不留豁口」。听着合理，实际是拿画质换的：它不看源图多大，《女书回响》的
+   714px 剧照被拉到 1330px，放大 1.86 倍，糊得很明显。
+   现在通栏权限改由构建脚本按真实像素宽度发（见 build-site.mjs 的 gallery），
+   奇数张的尾巴就让它空着——一页读到末尾，右下角空一格是正常的，
+   比放一张糊图强。 */
 
 /* ============================================================
    滚动浏览页（browse.html）
