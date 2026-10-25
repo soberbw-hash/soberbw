@@ -569,36 +569,36 @@ body.dark{background:#0B0F12}
   width:clamp(18px,2.4vw,34px);height:1px;
   background:rgba(198,240,74,.62);
 }
-/* 名字用思源宋体 800（Noto Serif SC）。只子集了「尤博文」三个字，1.3KB——
+/* 名字用思源黑体 800（Noto Sans SC）。只子集了「尤博文」三个字，4KB——
    中文展示字体动辄十几兆，但这里只排三个字，没必要把整副字库搬上来。
 
-   为什么从手写行书换过来：
-   行书那版的问题不是「不够艺术」，是「不够可信」。三个字大小不齐、重心各异，
-   在 216px 上放大之后，第一眼像签名草稿而不是名字；「博」写得尤其草，
-   得靠上下文才认得出。简历网站的第一屏就是这行字，认不出来就是失职。
+   这行字换过三次，留个记录：
+   1. 手写行书（志莽行书）——问题不是「不够艺术」，是「不够可信」：三个字
+      大小不齐、重心各异，放到 216px 之后第一眼像签名草稿而不是名字，
+      「博」尤其难认。简历网站的第一屏就是这行字，认不出来就是失职。
+   2. 思源宋体 800——高对比、有衬线，像电影片头。但字号一大，横细竖粗那套
+      对比反而显得「瘦而尖」，笔画在照片背景上发飘，用户看下来觉得「怪」。
+   3. 现在换成思源黑体 800：笔画粗细一致、重心方正，整块字压在明暗交错的
+      云层上最扎实，也不会跟下面那行手写签名（You Bowen）抢戏。
 
-   现在换成高对比的宋体黑字重，读起来像电影片头或杂志封面：
-   横细竖粗、有衬线，在照片背景上站得住，也不跟下面那行手写签名抢戏——
-   之前两处都是手写，谁也不比谁特别。
-
-   800 而不是 900：900 在大字号上有点「钝」，横画压得太实，
-   在明暗交错的云层上容易糊成一块；800 还留着笔画的对比。
+   800 而不是 900：900 在大字号上偏「钝」，「博」里的十和「文」的那一横
+   会挤成一团，像促销条幅；700 又偏轻，在照片上压不住。800 在两头之间。
 
    字重写死 400（字体文件里已经是 800 的轮廓），并且 font-synthesis:none：
-   浏览器一旦合成加粗，宋体的细横会被糊粗，高对比全没了。 */
+   浏览器一旦合成加粗，字形会被算法再描一遍，边缘发糊。 */
 @font-face{
   font-family:'Site Display';
-  src:url('../fonts/display/serif-name-800.woff2') format('woff2');
+  src:url('../fonts/display/sans-name-800.woff2') format('woff2');
   font-weight:400;font-style:normal;font-display:swap;
 }
 .sc-hero h1{
-  font-family:'Site Display','Noto Serif SC','Songti SC','Source Han Serif SC',serif;
+  font-family:'Site Display','Noto Sans SC','Source Han Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
   font-size:clamp(70px,15vw,300px);
   font-weight:400;font-synthesis:none;
   line-height:1.04;
-  /* 宋体本身是满格的方块字，字距放到 0 就已经很紧；再负会撞。
-     左缘不再补负边距：行书那 -.04em 是为了让「尤」的撇尖顶到左边缘，
-     宋体的「尤」是方方正正的，补了反而缩进。 */
+  /* 黑体是满格的方块字，字距 0 就已经贴在一起；再负会撞。
+     左缘不补负边距：行书那 -.04em 是为了让「尤」的撇尖顶到左边缘，
+     黑体的「尤」四边留白均匀，补了反而缩进。 */
   letter-spacing:0;
   color:#FAFAF7;
   text-shadow:
