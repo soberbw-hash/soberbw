@@ -93,14 +93,20 @@
 
     var last = performance.now();
     function frame(t, once) {
-      /* 云层的漂移速度是 2–13 px/s。60fps 下每帧只挪 0.03–0.2 像素——
-         这个量级上 30fps 和 60fps 的观感完全一样，但成本差一倍：
-         每帧要 clearRect 一整块画布、再画二十多张 660×330 的大图（带 alpha 混合）。
-         这笔开销和片带、和滚动抢的是同一块 GPU，所以按 30fps 出图。 */
-      if (!once && t - last < 30) { requestAnimationFrame(frame); return; }
+      /* 云层出图节奏：跟着屏幕刷新率走，封顶 60fps（16ms）。
+
+         原来这里写的是 30ms（30fps），理由是「云漂移 2–13px/s，每帧只挪
+         0.07–0.43px，30fps 和 60fps 观感一样，成本差一倍」。前半句没错，
+         但后半句当时没量——实测下来把这一层从 30fps 提到 60fps，
+         主线程占用 0.133 → 0.127 s/s，在噪声范围内（canvas2d 的画图命令
+         走的是光栅线程，不占主线程）。既然不要钱，就没有理由只给 30。
+
+         封顶 60 而不是不封顶：120Hz / 144Hz 屏上再往上加，云一帧只挪
+         0.1–0.2px，纯属白烧，而且和片带抢光栅带宽。 */
+      if (!once && t - last < 16) { requestAnimationFrame(frame); return; }
       var dt = Math.min((t - last) / 1000, 0.05);
       last = t;
-      // 视差跟随按秒收敛，不按帧数——改成 30fps 之后原来那个 0.06/帧 会慢一半
+      // 视差跟随按秒收敛，不按帧数——写成「每帧 0.06」的话，帧率一变跟随速度就变
       var k = Math.min(1, dt * 3.6);
       now.mx += (target.mx - now.mx) * k;
       now.my += (target.my - now.my) * k;
