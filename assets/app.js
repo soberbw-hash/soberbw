@@ -332,6 +332,29 @@
     track.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
     var offset = 0, vel = 0;
+    /* 惯性用「冲量 + 摩擦」算，不用「朝目标缓动」。
+
+       朝目标缓动（每帧 offset += (target-offset)*k）也能丝滑，但它永远不会滑过头：
+       手一停，它就照着剩下的距离收敛，尾巴很短，看着像「很快地停住」。
+       用户要的是「刹不住车」——手停了，带子还得再走一段。那就只能积速度，不能只存位置。
+
+       摩擦写成「每秒衰减到 X」而不是「每帧乘 0.9」：每帧乘系数的话，144Hz 屏上的
+       衰减速度是 60Hz 的两倍多，同一次滚轮在高刷屏上一闪就没了，手感跟设备有关。
+       按秒算，谁跑都一个样。
+
+       为什么滚轮和拖拽用两套摩擦：拖拽是「扔出去」，一次用力甩本来就该滑很远，
+       衰减到 5%/秒（总滑行 ≈ 初速/3）；滚轮是「推一下」，一格一格地推，
+       衰减到 0.4%/秒（总滑行 ≈ 初速/5.5），滑得干脆、收得干净。 */
+    var FRIC_DRAG = 0.05, FRIC_WHEEL = 0.004;
+    var fric = FRIC_DRAG;
+    /* 冲量系数：一格滚轮（Chrome 下 deltaY=100）给 1100px/s 的初速，
+       滑行约 200px——一张卡多一点。手感是「一格一格翻」，但每一格都是滑过去的。
+       因为冲量和摩擦都跟 deltaY 成正比，滚轮和触控板的总滑行都是
+       「滚动总量 × 2」，两种设备不会一个快一个慢。 */
+    var IMPULSE = 11;
+    /* 上限：连续快滚时冲量会一路累加，不封顶能飙到几万 px/s，
+       整条带子糊成一片、卡片来不及看清就飞过去了。5200 大约 5 张卡的滑行量。 */
+    var VMAX = 5200;
     var dragging = false, lastP = 0, lastT = 0, moved = 0, paused = false;
     var speed = reduce ? 0 : (mobile ? 11 : 18);
     // 拖拽跟着哪个轴走：横向带子看 X，竖向看 Y。每次按下时取一次，
@@ -359,6 +382,7 @@
       moved += dy;
       offset += dy;                 // 跟手 1:1
       vel = dy / dt;
+      fric = FRIC_DRAG;             // 松手之后按「扔出去」那套衰减
     });
     function endDrag() {
       if (!dragging) return;
@@ -374,19 +398,29 @@
 
     /* 滚轮：光标停在带子上时，滚轮直接滚这条带子。
        首页正好一屏、页面本身没有滚动条，所以这里吃掉默认行为不会有副作用。
-       位移 1:1、不给惯性——滚轮事件是离散的，再加惯性会滑过头；而且拖拽那边
-       已经有惯性了，两种手感混在一起反而乱。
        deltaMode 必须分开算：0 是像素、1 是「行」、2 是「页」。不换算的话，
        鼠标滚轮（Chrome 下 deltaY=100）和触控板（deltaY 只有 3 上下）差几十倍，
-       同一个动作在两种设备上快慢完全不同。 */
+       同一个动作在两种设备上快慢完全不同。
+
+       这里给的是冲量不是位移——见上面 IMPULSE 那段。原来写的是 `offset -= dy`：
+       一格滚轮带子瞬移 100px，中间一帧过渡都没有，观感就是「直上直下」。
+       现在滚轮只负责「推一把」，位置全交给循环里的积分和摩擦，
+       于是每一下都是加速—滑行—收住。 */
     track.addEventListener('wheel', function (e) {
       // 横向带子上，触控板的横向滚动优先；只有纵向滚轮（鼠标）时退而用 deltaY，
       // 否则窄窗口下用鼠标的人会发现滚轮对这条带子完全没反应。
       var dy = horiz ? (e.deltaX || e.deltaY) : e.deltaY;
       if (e.deltaMode === 1) dy *= 16;        // 行 → 约一行的高度
       else if (e.deltaMode === 2) dy *= horiz ? W : H;    // 页 → 整屏
-      offset -= dy;                           // 往下滚 = 内容往上走
-      vel = 0;                                // 滚轮优先，清掉拖拽留下的惯性
+      if (reduce) {
+        // 开了「减少动态」就老老实实一步到位，别给惯性——晕动症的人受不了。
+        offset -= dy;
+      } else {
+        vel -= dy * IMPULSE;                  // 往下滚 = 内容往上走
+        if (vel > VMAX) vel = VMAX;
+        else if (vel < -VMAX) vel = -VMAX;
+        fric = FRIC_WHEEL;
+      }
       paused = true;
       e.preventDefault();
     }, { passive: false });
@@ -400,7 +434,7 @@
 
       if (!dragging && Math.abs(vel) > 2) {
         offset += vel * dt;
-        vel *= Math.pow(0.05, dt);       // 速度每秒衰减到 5%
+        vel *= Math.pow(fric, dt);       // 按秒衰减：拖拽到 5%，滚轮到 0.4%
       } else if (!dragging && !paused && !reduce) {
         vel = 0;
         offset -= speed * dt;            // 常态缓慢上移
