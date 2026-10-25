@@ -397,7 +397,7 @@ body.dark{background:#000;color:#FAFAF7}
 }
 
 /* 占位图统一压暗去饱和：八张各唱各的调，看着像廉价滤镜 */
-.list-grid .frame svg,.vgrid3 .frame svg{filter:saturate(.6) brightness(.92)}
+.list-grid .frame svg{filter:saturate(.6) brightness(.92)}
 
 /* 联系页内容少，四块撑高一点，别让页面空掉 */
 .contact-grid a{padding:clamp(16px,2.6vh,30px) 0}
@@ -934,27 +934,10 @@ body.dt-page>main{width:100%;padding-top:0}
 @media (max-width:760px){
 }
 
-/* 作品列表里的竖屏卡片 */
-.list-grid a.is-v .frame{aspect-ratio:9/16;max-width:300px}
-
-/* 作品页：横屏一段、竖屏一段，竖屏用三列，避免和 16:9 挤在同一个网格里参差 */
-.sub-head{
-  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
-  margin-top:clamp(44px,7vh,84px);margin-bottom:clamp(20px,3vh,32px);
-  border-top:1px solid var(--rule-d);padding-top:clamp(20px,3vh,30px);
-}
-.sub-head h2{font-weight:600;font-size:clamp(18px,1.7vw,24px);line-height:1.3;letter-spacing:-.01em}
-.sub-head span{font-size:12px;color:var(--ink-d3);letter-spacing:.06em;white-space:nowrap}
-.vgrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.2vw,30px)}
-.vgrid3 a{display:block}
-.vgrid3 .frame{aspect-ratio:9/16;max-width:100%}
-.vgrid3 .cap{margin-top:11px}
-.vgrid3 .cap b{display:block;font-weight:500;font-size:clamp(14px,1.15vw,16px);line-height:1.4}
-.vgrid3 .cap i{font-style:normal;font-size:11.5px;color:var(--ink-d3)}
-.vgrid3 a:hover .cap b{color:var(--accent)}
-@media (max-width:760px){
-  .vgrid3{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
+/* 作品页原来在横屏列表下面还挂了一段「竖屏商业」三列网格（.sub-head + .vgrid3）。
+   9:16 的卡和 16:9 的卡同页并排，横向尺寸对不齐、看着散，用户要求整段删掉；
+   对应的 .sub-head / .vgrid3 / .list-grid a.is-v 规则也一并清掉了，不留死样式。
+   那三部竖屏作品本身还在（首页片带能点到，作品详情页也都在）。 */
 
 /* ============================================================
    真图替换占位图后的统一处理 + 抽牌交互
@@ -1018,12 +1001,12 @@ body.dt-page>main{width:100%;padding-top:0}
 }
 
 /* ---------- 列表页：真图 ---------- */
-.list-grid .frame img,.vgrid3 .frame img{
+.list-grid .frame img{
   width:100%;height:100%;object-fit:cover;display:block;
   transition:transform .9s var(--ease),filter .5s;
 }
-.list-grid a:hover .frame img,.vgrid3 a:hover .frame img{transform:scale(1.035)}
-.list-grid .frame,.vgrid3 .frame{background:#141813}
+.list-grid a:hover .frame img{transform:scale(1.035)}
+.list-grid .frame{background:#141813}
 
 /* 列表页标题区只留标题 */
 .sec-head{grid-template-columns:1fr;align-items:start;margin-bottom:clamp(22px,3.2vh,38px)}
