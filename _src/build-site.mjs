@@ -608,13 +608,6 @@ const SUMMARY = [
 ];
 
 const indexBody = `<main class="sc-stage">
-  <svg class="sc-defs" aria-hidden="true" focusable="false">
-    <filter id="sc-refract" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="11" result="n"/>
-      <feGaussianBlur in="n" stdDeviation="5" result="nb"/>
-      <feDisplacementMap in="SourceGraphic" in2="nb" scale="14" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </svg>
   <video class="sc-film" id="film" aria-hidden="true" tabindex="-1"
          autoplay muted loop playsinline preload="auto" disablepictureinpicture
          poster="media/island-poster.jpg">

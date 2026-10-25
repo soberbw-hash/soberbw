@@ -258,9 +258,6 @@ body.dark{background:#0B0F12}
 
 .sc-sky{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;filter:contrast(1.14) saturate(1.06)}
 
-/* 折射滤镜的定义体，不占布局 */
-.sc-defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
-
 /* 顶部压暗 + 左侧压暗 + 四角压暗，保证白字在任何云层上都读得出来
 
    左边这一条改过两处，都是为了消掉用户圈出来的那条「黑边」：
@@ -304,10 +301,11 @@ body.dark{background:#0B0F12}
   box-shadow:0 10px 30px -12px rgba(198,240,74,.55),inset 0 1px 0 rgba(255,255,255,.55)}
 .sc-brand:hover{transform:translateY(-1px) scale(1.03);box-shadow:0 16px 38px -14px rgba(198,240,74,.7),inset 0 1px 0 rgba(255,255,255,.7)}
 
-/* ---------- 液态玻璃：折射 + 曲面高光 + 内缘回光 ----------
-   backdrop-filter 里挂了一个 SVG 位移滤镜（feTurbulence → feDisplacementMap），
-   让背后画面的边缘被轻微扭一下，玻璃才有「厚」的感觉。Chrome 支持；
-   不支持的浏览器自动退化成磨砂玻璃，下面的渐变和内阴影已经把体块撑起来了。 */
+/* ---------- 液态玻璃：曲面高光 + 内缘回光 ----------
+   原来 backdrop-filter 里还挂了一个 SVG 位移滤镜（feTurbulence → feDisplacementMap），
+   想让背后画面边缘被轻微扭一下、玻璃显得「厚」。问题是 Chrome 会把元素自己的
+   文字一起喂进滤镜，字被噪声推歪十几像素，看着就是「发虚」——2026-10-26 去掉了。
+   体块感现在全靠渐变和内阴影撑着，不靠折射。 */
 .sc-cta{
   position:relative;overflow:hidden;
   color:#FAFAF7;border:0;
@@ -315,8 +313,8 @@ body.dark{background:#0B0F12}
     rgba(255,255,255,.30) 0%,
     rgba(255,255,255,.09) 42%,
     rgba(255,255,255,.20) 100%);
-  -webkit-backdrop-filter:url(#sc-refract) blur(11px) saturate(1.7) brightness(1.16);
-  backdrop-filter:url(#sc-refract) blur(11px) saturate(1.7) brightness(1.16);
+  -webkit-backdrop-filter:blur(11px) saturate(1.7) brightness(1.16);
+  backdrop-filter:blur(11px) saturate(1.7) brightness(1.16);
   box-shadow:
     0 10px 34px -10px rgba(4,8,10,.6),
     inset 0 1px 0 rgba(255,255,255,.55),
@@ -580,21 +578,34 @@ body.dark{background:#0B0F12}
     inset 0 0 0 1px rgba(255,255,255,.09);
 }
 .sc-card .cap{
-  position:absolute;left:16px;right:16px;bottom:13px;z-index:2;color:#F2F0EA;
+  position:absolute;left:16px;right:auto;bottom:13px;z-index:2;color:#F2F0EA;
+  /* 宽度跟着文字走，不再横跨整张卡。
+     上一版是 left:16px;right:16px，框宽 = 卡片宽 - 32px（1920 下 487px），
+     悬停时那一片玻璃把照片下半截整个糊住了。这一页是给人看图的，
+     字幕不该占这么大——收成 max-content 之后只剩包住文字那一小块。 */
+  width:max-content;max-width:calc(100% - 32px);
   border-radius:10px;padding:0;
   transition:opacity .35s linear,background .42s var(--ease),
              box-shadow .42s var(--ease),padding .42s var(--ease);
 }
-/* 抽出来的那张卡，字幕变成一小片玻璃：压在照片上，折射才有东西可折 */
+/* 抽出来的那张卡，字幕变成一小片玻璃，只包住文字。
+
+   这里不再挂 url(#sc-refract) 那个位移滤镜。Chrome 会把元素自己的文字
+   也喂进 feDisplacementMap——噪声把字形推歪 14px，看起来就是「发虚」。
+   放大 3 倍对比过：去掉之后文字立刻锐利，毛玻璃的质感一点没丢，
+   而且背后照片不再被扭出波纹，更像「玻璃盖在图上」而不是「图被搅了一下」。
+
+   背景透明度从 .24/.07 降到 .14/.045：原来那片白太厚，压在照片上像蒙了层雾。
+   blur 也从 8px 收到 6px——糊得越狠，越挡图。 */
 .sc-card:hover .cap{
-  padding:7px 9px;
-  background:linear-gradient(150deg,rgba(255,255,255,.24),rgba(255,255,255,.07));
-  -webkit-backdrop-filter:url(#sc-refract) blur(8px) saturate(1.55);
-  backdrop-filter:url(#sc-refract) blur(8px) saturate(1.55);
+  padding:6px 9px;
+  background:linear-gradient(150deg,rgba(255,255,255,.14),rgba(255,255,255,.045));
+  -webkit-backdrop-filter:blur(6px) saturate(1.5);
+  backdrop-filter:blur(6px) saturate(1.5);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.45),
-    inset 0 0 0 1px rgba(255,255,255,.13),
-    0 8px 22px -6px rgba(0,0,0,.45);
+    inset 0 1px 0 rgba(255,255,255,.3),
+    inset 0 0 0 1px rgba(255,255,255,.1),
+    0 6px 18px -6px rgba(0,0,0,.4);
 }
 .sc-card .cap b{display:block;font-weight:500;font-size:12.5px;line-height:1.35;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 片名底下那行（片种 / 场次）常态不显示。
