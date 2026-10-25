@@ -554,25 +554,6 @@
 })();
 
 /* 联系页：点一下复制微信号 */
-document.querySelectorAll('[data-copy]').forEach(function (el) {
-  el.addEventListener('click', function () {
-    var text = el.getAttribute('data-copy');
-    var hint = el.querySelector('.ct-hint');
-    var done = function () {
-      el.classList.add('copied');
-      if (hint) hint.textContent = '已复制 ' + text;
-      setTimeout(function () {
-        el.classList.remove('copied');
-        if (hint) hint.textContent = '点击复制';
-      }, 1800);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, done);
-    } else {
-      var t = document.createElement('textarea');
-      t.value = text; document.body.appendChild(t); t.select();
-      try { document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(t); done();
-    }
-  });
-});
+/* 复制微信号的逻辑已经搬到 assets/copy.js —— 只有联系页用得上，
+   放在这里等于每个加载 app.js 的页面都背一段用不到的代码。
+   另外原来那句 .then(done, done) 会把复制失败也报成成功，那边一并修了。 */

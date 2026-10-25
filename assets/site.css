@@ -1440,6 +1440,10 @@ body.dt-page>main{width:100%;padding-top:0}
 .ct-copy .ct-hint{transition:color .25s}
 .ct-copy.copied{border-color:var(--gold);background:#FBF7EE}
 .ct-copy.copied .ct-hint{color:#8A7448}
+/* 复制失败。给个能看出来的红，但不用正红——那是报错的颜色，
+   这里只是「没成，你手动选一下」，不是出事了。 */
+.ct-copy.failed{border-color:#B4553F;background:#FDF6F3}
+.ct-copy.failed .ct-hint{color:#B4553F}
 
 .ct-links{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
