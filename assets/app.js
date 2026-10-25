@@ -296,6 +296,9 @@
         var s = cards[i].style;
         s.width = w; s.height = h;
         s.left = '0px'; s.top = '0px';
+        // 尺寸一变，pitch / setH 也跟着变，量化缓存必须作废，否则下一帧
+        // 会拿着旧格子判断「没动」，卡片停在原地不重排
+        cards[i].__tq = undefined;
       }
     }
 
@@ -427,8 +430,33 @@
 
     addEventListener('resize', measure);
 
-    var last = performance.now();
+    /* ---------- 帧预算：这一屏的「卡」几乎全在这几个 transform 上 ----------
+
+       实测（无头 Chrome，1440×900，首页静止，Performance.getMetrics 取 3s 增量）：
+
+         · 带子在走              主线程占用 0.56 s/s，其中样式重算 0.48 s/s
+         · 指针停在带子上（paused，一帧都不写）   0.05 s/s，样式重算 0.00
+
+       也就是说：**只要不写 transform，这一屏就几乎没有开销**；写了，就吃掉
+       一半以上的主线程。所以省的不是「算得够不够快」，是「到底写不写」。
+
+       两条省钱的办法，都不改观感：
+
+       1. 高刷屏封顶 60fps。rAF 跟着屏幕刷新率跑，144Hz 屏上这一段的开销是
+          60Hz 的 2.4 倍——而带子一帧只挪 0.3px，多出来的帧纯属白烧。
+          隔不到 14ms 就不干活，60Hz 屏完全不受影响。
+
+       2. 位置按 0.5px 量化，没跨过半像素就不写。
+          常态漂移 18px/s、一帧 0.3px，量化之后大约每两帧才真写一次。
+          0.5px 在这个尺寸上是亚像素，看不出来；快滚（>240px/s）自动回到
+          0.1px 精度，免得快速移动时出现台阶。
+
+       注意跳过帧的时候不能更新 last——dt 要跨过被跳掉的时间，
+       否则 60Hz 屏上积分会少掉一半。 */
+    var last = performance.now(), lastDraw = 0;
     (function loop(t) {
+      if (t - lastDraw < 14) { requestAnimationFrame(loop); return; }
+      lastDraw = t;
       var dt = Math.min((t - last) / 1000, 0.05);
       last = t;
 
@@ -453,6 +481,12 @@
       var reach = half + (horiz ? cardW : cardH) / 2;
       var baseX = leftBase;
       var baseY = (H - cardH) / 2;
+
+      /* 位置量化精度：慢的时候 0.5px，快的时候 0.1px。
+         为什么按速度切换：常态漂移 18px/s，一帧 0.3px，0.5px 一格意味着大约
+         每两帧才写一次；而滚轮甩到 2000px/s 时一帧就是 33px，0.5px 的量化
+         会让卡片出现台阶，这时候必须回到 0.1px。 */
+      var step = (dragging || Math.abs(vel) > 240) ? 10 : 2;
 
       for (var i = 0; i < cards.length; i++) {
         var el = cards[i];
@@ -481,6 +515,14 @@
           continue;
         }
         if (el.__vis !== true) { el.style.visibility = 'visible'; el.__vis = true; }
+
+        /* 位置没跨过量化格就整张跳过——连 dv / scale / rotate 都不算。
+           弹簧还在动的时候（hp 或 hv 非 0）必须每帧写，否则抽牌会一顿一顿。 */
+        var tq = Math.round(tt * step) / step;
+        if (!hp && !hv && tq === el.__tq) continue;
+        el.__tq = tq;
+        // 后面算 dv / s / rot 都用量化后的值，写出来的字符串才稳定、才能被比对掉
+        tt = tq;
 
         /* ---------- 曲线 ----------
            dv = 这张卡离带子中线多远，以半屏为 1。
