@@ -25,7 +25,11 @@
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{background:var(--paper);color:var(--ink-d);font-family:var(--sans);line-height:1.7;font-weight:400;font-size:16px;-webkit-font-smoothing:antialiased}
 img,svg{display:block;max-width:100%}
-a{color:inherit;text-decoration:none}
+/* manipulation：允许滚动和双指缩放，但关掉「双击缩放」。
+   手机上双击一个链接时，浏览器会先等 300ms 看是不是双击，才决定要不要跳转——
+   那一下的迟疑就是「点了没反应」。链接和按钮都关掉它，不影响页面缩放。 */
+a{color:inherit;text-decoration:none;touch-action:manipulation}
+button{touch-action:manipulation}
 .defs{position:absolute;width:0;height:0;overflow:hidden}
 .wrap{max-width:1600px;margin:0 auto;padding:0 var(--m)}
 
@@ -554,9 +558,14 @@ body.dark{background:#0B0F12}
   .sc-hero{
     position:relative;
     left:auto;right:auto;top:auto;bottom:auto;
-    flex:0 0 auto;
+    /* 单栏时占满「带子以上」的整块，内容竖向居中。
+       高屏（iPad 竖屏 820×1180）上原来是顶上对齐，结果名字和简介贴着顶、
+       带子贴着底，中间空出三百多像素，像漏了一块。居中之后空白被摊到上下两边，
+       同一个屏变成「上面留白 / 中间是字 / 下面留白 / 带子」的对称结构。
+       矮屏（640/667）本来就没有富余，居中等于不居中，不影响。 */
+    flex:1 1 auto;
+    display:flex;flex-direction:column;justify-content:center;
     padding:clamp(78px,13vh,132px) 20px 0;
-    display:block;
   }
   .sc-hero-in{max-width:none}
   .sc-hero h1{font-size:clamp(88px,23vw,150px);line-height:1.06}
@@ -569,13 +578,23 @@ body.dark{background:#0B0F12}
   .sc-rail{
     position:relative;
     left:auto;right:auto;top:auto;bottom:auto;
-    width:auto;height:auto;
-    /* flex-basis 给个下限，剩下的靠 grow 补满——stage 只有 min-height，
-       basis 写成 auto 的话子项全是绝对定位、高度为 0，带子会直接塌掉 */
-    flex:1 1 clamp(220px,34vh,380px);
-    min-height:clamp(200px,30vh,340px);
+    width:auto;
+    /* 高度定死，不再让它去吸剩下的空间：
+       竖版是「一列很长的胶片」，横版是一条固定高度的带子。
+       定高之后配 margin-top:auto，带子贴在屏底，正文和带子之间自然留白，
+       短屏（360×640）上也不会把页面顶出视口。 */
+    flex:0 0 auto;
+    margin-top:auto;
+    height:clamp(150px,20vh,208px);
     padding:0 20px;
+    /* 横向走，遮罩就得跟着转 90°：左右淡出，不是上下 */
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 95%,transparent 100%);
   }
+  /* pan-y：竖着划让浏览器滚页面，横着划才交给带子。
+     桌面那条是 touch-action:none（整条带子吃掉手势），手机上不能这么干——
+     首页在短屏上是要滚一点点的，带子把竖划吃掉，手指按在带子上就卡住了。 */
+  .sc-track{touch-action:pan-y}
   .sc-card .cap{left:12px;right:12px;bottom:10px}
   .sc-card .cap b{font-size:11.5px}
   .sc-card .cap i{font-size:9px}
@@ -593,6 +612,19 @@ body.dark{background:#0B0F12}
     opacity:.74;
   }
   }
+
+/* 短屏：360×640（SE / 老安卓）、390×667（iPhone 8）这一档。
+   首页本来是「一屏就是全部」的设计，但这两种屏幕竖着只有 640/667，
+   名字 + 三行简介 + 片带加起来会顶出去六十来像素，页面能滚一小截——
+   滚一下发现后面什么都没有，观感就是「没做完」。
+   收三处：顶上留白、名字、简介与名字的间距。名字只收一档（88→70），
+   再小就不像「一屏就这一行字」了。 */
+@media (max-width:900px) and (max-height:720px){
+  .sc-hero{padding-top:clamp(54px,8vh,76px)}
+  .sc-hero h1{font-size:clamp(70px,19vw,110px)}
+  .sc-en{margin-top:14px}
+  .sc-sub{margin-top:clamp(12px,2vh,20px)}
+}
 
 /* 噪点 + 色彩分级：把程序画的云从"雾"拉向"胶片" */
 .sc-grain{
@@ -1693,4 +1725,72 @@ body.bz-page .topbar::after{
 
 @media (prefers-reduced-motion:reduce){
   @view-transition{navigation:none}
+}
+
+/* ============================================================
+   触摸目标：手指点不准 25×24 的东西
+   ============================================================ */
+/* 这一块只在「触屏」或「窄屏」时生效。
+   为什么用 pointer:coarse 而不是只按宽度：iPad 竖屏是 820、横屏 1024，
+   一样是手指，宽度断点抓不全。两条并着写，取并集。
+
+   原来顶栏那四个链接实测 25×24（12.5px 的字，上下只有行高），
+   拇指按下去十次有三次点空。Apple HIG / Material 的底线都是 44×44。
+
+   为什么不直接把 padding 加到链接上：顶栏的「当前页」标记是一条 border-bottom
+   下划线，加 padding-bottom 会把线推到字下面十几像素，看着像脱开了。
+   所以下划线改成 ::after 自己定位，点击区随便撑。 */
+@media (pointer:coarse), (max-width:900px){
+  .topbar .in{align-items:center;padding-top:5px;padding-bottom:5px}
+  .topbar nav{gap:0}
+  .topbar nav a{
+    position:relative;
+    padding:14px 8px;
+    border-bottom:0;
+  }
+  .topbar nav a::after{
+    content:"";position:absolute;left:8px;right:8px;bottom:8px;height:1px;
+    background:transparent;transition:background .2s;
+  }
+  .topbar nav a:hover::after,
+  .topbar nav a[aria-current]::after{background:var(--gold)}
+  /* 站名本身也是回首页的链接，一起撑到 44 */
+  .mark{display:inline-flex;align-items:center;min-height:44px}
+
+  /* 详情页顶部的「← 全部作品 / 尤博文」，下划线同样挪到 ::after */
+  .dt-top a{padding:12px 0;border-bottom:0;position:relative}
+  .dt-top a::after{
+    content:"";position:absolute;left:0;right:0;bottom:7px;height:1px;
+    background:rgba(255,255,255,.16);
+  }
+  .dt-top a:hover::after{background:var(--gold)}
+  .dt-mark{padding-left:8px;padding-right:8px}
+  .dt-mark::after{left:8px;right:8px}
+
+  /* 软件页的「GitHub 与下载 / 在线试用」这类外链 */
+  .tool-link{min-height:44px;display:inline-flex;align-items:center;justify-content:flex-end}
+  /* 联系页 GitHub 那一条 */
+  .ct-links a{min-height:44px}
+
+  /* 首页胶囊导航：34px 的胶囊在手指上偏矮，抬到 40。视觉上还是那颗胶囊 */
+  .sc-pill{height:40px}
+  .sc-links a{padding:12px 6px}
+}
+
+/* 页脚的「返回首页」实测 48×17，也是手指点不准的尺寸。
+   不能直接加 padding：footer 是 flex，加了下边距整条页脚会被顶高、跟上面的
+   分隔线脱开。用一块透明的 ::after 把点击区往上下各撑 13px，版式一点不动。 */
+@media (pointer:coarse), (max-width:900px){
+  footer a{position:relative;display:inline-block;border-bottom:1px solid var(--rule-d)}
+  footer a::after{content:"";position:absolute;left:-6px;right:-6px;top:-13px;bottom:-13px}
+}
+/* browse 的进度点：手机上一律不显示。
+   原来它在窄屏挪到屏底正中，做成一颗浮着的胶囊。问题是它是 fixed 的，
+   内容从它底下滚过去——实测在 390 上正好压住卡片字幕「武汉声音，过早了…」，
+   把一句话从中间截断。加内边距只会把胶囊撑得更大、压得更多。
+   而它本来就是个「跳章节 + 看进度」的控件，手机顶栏那四个链接（作品 / 简历 /
+   软件 / 联系）跳的是同样四个位置，功能重复。所以窄屏直接收掉，
+   把屏底还给内容。 */
+@media (max-width:760px){
+  .bz-dots{display:none}
 }

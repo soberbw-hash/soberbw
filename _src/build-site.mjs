@@ -545,7 +545,7 @@ function footer(depth) {
   </footer>`;
 }
 
-function layout({ title, desc, depth = 0, current = '', body, bodyClass = '', bare = false, minimal = false, script = '', path = '', htmlClass = '', ogImage = '' }) {
+function layout({ title, desc, depth = 0, current = '', body, bodyClass = '', bare = false, minimal = false, script = '', path = '', htmlClass = '', ogImage = '', theme = 'light' }) {
   const p = depth ? '../' : '';
   const url = `${SITE}/${path}`;
   /* 分享图（og:image）默认给站点主视觉，但作品页要给自己那张。
@@ -573,7 +573,7 @@ function layout({ title, desc, depth = 0, current = '', body, bodyClass = '', ba
 <meta property="og:image:width" content="${ogW}">
 <meta property="og:image:height" content="${ogH}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0B0F12">
+<meta name="theme-color" content="${theme === 'dark' ? '#0A0A09' : '#F5F4F0'}">
 <link rel="icon" href="${p}assets/favicon.svg?v=${ASSET_V}" type="image/svg+xml">
 <link rel="icon" href="${p}assets/favicon-16.png?v=${ASSET_V}" sizes="16x16" type="image/png">
 <link rel="icon" href="${p}assets/favicon-32.png?v=${ASSET_V}" sizes="32x32" type="image/png">
@@ -1030,6 +1030,7 @@ writeFileSync(join(ROOT, 'index.html'), layout({
   bodyClass: 'dark',
   script: 'app.js',
   path: '',
+  theme: 'dark',
   body: indexBody,
 }));
 
@@ -1064,6 +1065,7 @@ ALL.forEach((w, i) => {
     depth: 1,
     minimal: true,
     bodyClass: 'dt-page',
+    theme: 'dark',
     path: `work/${w.slug}.html`,
     /* 竖版作品（X100、智云）的 hero / cover 都是 520×845 的竖图，
        分享卡是横的，竖图进去只剩中间一条。rail 那张本来就是给 2:1 片带

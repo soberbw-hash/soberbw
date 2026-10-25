@@ -208,6 +208,12 @@
 
     var W = 0, H = 0, cardW = 0, cardH = 0, pitch = 0, setH = 0, padL = 0, leftBase = 0;
     var cards = [];
+    /* 轴向：桌面是「右侧一列竖着走的胶片」，手机是「底部一条横着走的胶片」。
+       手机为什么要换轴：底部横带里竖着拖，既不像翻片带（手指该往左右划），
+       又会把页面滚动抢走——短屏（360×640）上首页本来会多出几十像素的滚动，
+       手指按在带子上就再也滚不动了。换轴之后 touch-action 可以放成 pan-y，
+       竖划滚页面、横划翻片带，两个手势不打架。 */
+    var horiz = false;
 
     /* ---------- 四个可调的量 ----------
 
@@ -247,20 +253,32 @@
       // 悬停，缩了就再也长不回来。0.94 只当是「比原来收一口气」。
       // 放在 measure 里而不是模块顶上：窗口从 1024 拖到 834 要跟着变。
       var oneCol = matchMedia('(max-width: 900px)').matches;
+      horiz = oneCol;
       QUIET = oneCol ? 0.92 : 0.80;
       TAPER = oneCol ? 0.12 : 0.20;
       HOVER = 1 / QUIET;
-      // 卡宽上限还要受带子高度约束：手机端片带横跨整屏，卡宽等于带宽时 2:1 的卡
-      // 会比带子还高，只能露出中间一条。按「一屏看得见两张多一点」定，
-      // 片带才像一条还在走的胶片，而不是一张巨大的图。
-      // 再乘 QUIET：缩的是「格子」本身，不是缩放——格子小了，间距跟着小，
-      // 一屏能看见的卡就多，整条带子自然变轻；字号也还是 12.5px，不会被拉糊。
-      cardW = Math.min(W, H * 0.95) * QUIET;
-      cardH = cardW / 2;
-      // 位移不是卡高 ×（1+间距），而是卡高 × 0.94：卡片缩了，间距要是还按卡高
-      // 算，中间那张（最小的）底下就会空出一大块，看上去像断了。0.94 让中间
-      // 留 14% 的空、两端刚好挨上——一头松一头紧，才是一条被弯起来的带子。
-      pitch = cardH * PITCH;
+      if (horiz) {
+        /* 横向：卡宽先按「一屏露出一张半」定（0.74 屏宽），
+           再用带子高度兜一个上限（2:1 的卡，高不超过带子的 86%）——
+           两条约束谁更紧听谁的。窄高屏（360×640）是高度先撞线，
+           宽屏手机是宽度先撞线，两种都不会把卡撑出带子。 */
+        cardW = Math.min(W * 0.74, H * 1.72) * QUIET;
+        cardH = cardW / 2;
+        // 位移按卡宽算，不按卡高：横向的间距是左右留的
+        pitch = cardW * PITCH;
+      } else {
+        // 卡宽上限还要受带子高度约束：手机端片带横跨整屏，卡宽等于带宽时 2:1 的卡
+        // 会比带子还高，只能露出中间一条。按「一屏看得见两张多一点」定，
+        // 片带才像一条还在走的胶片，而不是一张巨大的图。
+        // 再乘 QUIET：缩的是「格子」本身，不是缩放——格子小了，间距跟着小，
+        // 一屏能看见的卡就多，整条带子自然变轻；字号也还是 12.5px，不会被拉糊。
+        cardW = Math.min(W, H * 0.95) * QUIET;
+        cardH = cardW / 2;
+        // 位移不是卡高 ×（1+间距），而是卡高 × 0.94：卡片缩了，间距要是还按卡高
+        // 算，中间那张（最小的）底下就会空出一大块，看上去像断了。0.94 让中间
+        // 留 14% 的空、两端刚好挨上——一头松一头紧，才是一条被弯起来的带子。
+        pitch = cardH * PITCH;
+      }
       leftBase = padL + (W - cardW) / 2;
       // 一整组的长度也要跟着重算：拖窄窗口之后 pitch 变了，setH 还留着旧值的话，
       // 折回的那一圈和卡的实际间距对不上，滚动时会突然空出一段。
@@ -284,7 +302,8 @@
     measure();
 
     // 一组铺不满一屏时补一组（正常屏幕用不到，超长屏兜底）
-    if (pitch * originals.length < H + cardH * 2) {
+    // 比的是「这一组够不够长」：竖着看带子高度，横着看带子宽度。
+    if (pitch * originals.length < (horiz ? W + cardW * 2 : H + cardH * 2)) {
       [].slice.call(track.children).forEach(function (c) {
         var cp = c.cloneNode(true);
         cp.setAttribute('aria-hidden', 'true');
@@ -304,16 +323,29 @@
       c.addEventListener('mouseleave', function () { if (hoverEl === c) hoverEl = null; });
     });
 
+    /* 拦住浏览器原生拖放。
+       每张卡都是 <a><img>，按住一拖，浏览器会把它当成「拖拽这个链接 / 图片」，
+       拖放一开始就发一个 pointercancel，把我们的拖拽序列当场掐断——
+       表现是：按住卡片只跟手第一下，之后变成惯性乱飞，而且卡片会被拖出个影子。
+       桌面和手机都中招（手机上是长按触发）。dragstart 上 preventDefault
+       是唯一能彻底拦住原生拖放的地方，CSS 的 -webkit-user-drag 只覆盖一部分。 */
+    track.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
     var offset = 0, vel = 0;
-    var dragging = false, lastY = 0, lastT = 0, moved = 0, paused = false;
+    var dragging = false, lastP = 0, lastT = 0, moved = 0, paused = false;
     var speed = reduce ? 0 : (mobile ? 11 : 18);
+    // 拖拽跟着哪个轴走：横向带子看 X，竖向看 Y。每次按下时取一次，
+    // 拖到一半窗口跨过断点也不会突然换轴。
+    var axisX = false;
 
     track.addEventListener('pointerenter', function () { paused = true; });
     track.addEventListener('pointerleave', function () { paused = false; });
 
     track.addEventListener('pointerdown', function (e) {
       dragging = true; moved = 0; vel = 0;
-      lastY = e.clientY; lastT = performance.now();
+      axisX = horiz;
+      lastP = axisX ? e.clientX : e.clientY;
+      lastT = performance.now();
       track.classList.add('dragging');
       track.setPointerCapture(e.pointerId);
     });
@@ -321,8 +353,9 @@
       if (!dragging) return;
       var now = performance.now();
       var dt = Math.max(8, now - lastT) / 1000;
-      var dy = e.clientY - lastY;
-      lastY = e.clientY; lastT = now;
+      var p = axisX ? e.clientX : e.clientY;
+      var dy = p - lastP;
+      lastP = p; lastT = now;
       moved += dy;
       offset += dy;                 // 跟手 1:1
       vel = dy / dt;
@@ -347,9 +380,11 @@
        鼠标滚轮（Chrome 下 deltaY=100）和触控板（deltaY 只有 3 上下）差几十倍，
        同一个动作在两种设备上快慢完全不同。 */
     track.addEventListener('wheel', function (e) {
-      var dy = e.deltaY;
+      // 横向带子上，触控板的横向滚动优先；只有纵向滚轮（鼠标）时退而用 deltaY，
+      // 否则窄窗口下用鼠标的人会发现滚轮对这条带子完全没反应。
+      var dy = horiz ? (e.deltaX || e.deltaY) : e.deltaY;
       if (e.deltaMode === 1) dy *= 16;        // 行 → 约一行的高度
-      else if (e.deltaMode === 2) dy *= H;    // 页 → 整屏
+      else if (e.deltaMode === 2) dy *= horiz ? W : H;    // 页 → 整屏
       offset -= dy;                           // 往下滚 = 内容往上走
       vel = 0;                                // 滚轮优先，清掉拖拽留下的惯性
       paused = true;
@@ -376,12 +411,18 @@
         while (offset > 0) offset -= setH;
       }
 
-      var cy = H / 2, reach = H / 2 + cardH / 2;
-      var leftX = leftBase;
+      /* 带子的中线和「卡正好居中时的位置」。
+         竖着走：中线在 H/2，卡只沿 Y 移动；
+         横着走：中线在 W/2，卡只沿 X 移动。
+         两个轴共用同一套 taper / 倾角 / 折回逻辑，只是把 tt 加到哪个坐标上。 */
+      var half = horiz ? W / 2 : H / 2;
+      var reach = half + (horiz ? cardW : cardH) / 2;
+      var baseX = leftBase;
+      var baseY = (H - cardH) / 2;
 
       for (var i = 0; i < cards.length; i++) {
         var el = cards[i];
-        var tt = (i * pitch + offset) - cy + cardH / 2;   // 卡片中心相对视口中心
+        var tt = (i * pitch + offset) - half + (horiz ? cardW : cardH) / 2;   // 卡片中心相对带子中线
         // 折回 [-setH/2, setH/2)，保证首尾接得上
         if (setH > 0) tt = ((tt + setH / 2) % setH + setH) % setH - setH / 2;
 
@@ -417,7 +458,7 @@
            为什么是线性而不是 d²：幂函数会让中间一大段几乎一样大，看上去是
            「一列同样大小的卡，只有最上面那张突然变大」；线性才是从中间往两头
            均匀地长，像一条被弯起来的带子。 */
-        var dv = Math.abs(tt) / (H / 2);
+        var dv = Math.abs(tt) / half;
         if (dv > 1) dv = 1;
 
         // 中间最小、两端长回来。
@@ -443,10 +484,15 @@
            另外比一下字符串：鼠标停在带子上、或者开了「减少动态」时，offset 不动，
            每帧算出来的 transform 是一模一样的。写同样的值浏览器照样要重算样式，
            所以只在真的变了的时候写。 */
-        var tf = 'translate3d(' + leftX.toFixed(1) + 'px,' +
-          (cy + tt - cardH / 2 - 30 * hp).toFixed(1) + 'px,0)' +
-          ' rotate(' + rot.toFixed(3) + 'deg)' +
-          ' scale(' + s.toFixed(4) + ')';
+        var tf = horiz
+          ? 'translate3d(' + (baseX + tt).toFixed(1) + 'px,' +
+            (baseY - 22 * hp).toFixed(1) + 'px,0)' +
+            ' rotate(' + rot.toFixed(3) + 'deg)' +
+            ' scale(' + s.toFixed(4) + ')'
+          : 'translate3d(' + baseX.toFixed(1) + 'px,' +
+            (baseY + tt - 30 * hp).toFixed(1) + 'px,0)' +
+            ' rotate(' + rot.toFixed(3) + 'deg)' +
+            ' scale(' + s.toFixed(4) + ')';
         if (el.__tf !== tf) { el.style.transform = tf; el.__tf = tf; }
 
         /* 字幕不再单独淡出，交给 .sc-rail 的 mask。
