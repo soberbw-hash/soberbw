@@ -1462,18 +1462,24 @@ body.dt-page>main{width:100%;padding-top:0}
 .ct-copy.failed{border-color:#B4553F;background:#FDF6F3}
 .ct-copy.failed .ct-hint{color:#B4553F}
 
+/* 这一行原来放三条外链（GitHub / 新片场 / 抖音），三列网格，每格里
+   「名字」靠左、「账号」靠右。后来新片场和抖音那两个地址是错的，删了，
+   只剩 GitHub 一条——三列网格配一条内容，右边会空掉三分之二；
+   改成两端对齐又会把「soberbw-hash」推到一千多像素之外，像排版坏了。
+
+   所以改成普通的行内排列：名字和账号挨着，左对齐。以后再加链接，
+   横向排开就行，不用回来改列数。 */
 .ct-links{
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:clamp(14px,2.2vw,30px);
+  display:flex;flex-wrap:wrap;
+  gap:10px clamp(28px,4.6vw,64px);
   margin-top:clamp(28px,4.4vh,52px);
   border-top:1px solid var(--rule-d);padding-top:clamp(20px,3vh,30px);
 }
 .ct-links a{
-  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  display:flex;align-items:baseline;gap:10px;
   font-size:14px;padding:4px 0;transition:color .25s,gap .25s;
 }
-.ct-links a b{font-weight:500}
-.ct-links a:hover{gap:16px}
+.ct-links a:hover{gap:14px}
 .ct-links a span{font-size:11.5px;color:var(--ink-d3)}
 .ct-links a:hover{color:var(--accent)}
 
@@ -1490,7 +1496,7 @@ body.dt-page>main{width:100%;padding-top:0}
   #exp-2:checked~.exp-list label[for="exp-2"],
   #exp-3:checked~.exp-list label[for="exp-3"]{border-left-color:transparent;border-top-color:var(--ink-d)}
   .skill-list{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .ct-grid,.ct-links{grid-template-columns:1fr;gap:12px}
+  .ct-grid{grid-template-columns:1fr;gap:12px}
   .dt-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:560px){
