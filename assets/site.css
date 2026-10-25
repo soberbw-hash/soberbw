@@ -28,7 +28,6 @@ img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 .defs{position:absolute;width:0;height:0;overflow:hidden}
 .wrap{max-width:1600px;margin:0 auto;padding:0 var(--m)}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* ---------- 顶栏 ---------- */
 .topbar{position:fixed;left:0;right:0;top:0;z-index:100;background:rgba(10,10,9,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.07);transition:background .3s}
@@ -39,18 +38,8 @@ a{color:inherit;text-decoration:none}
 .topbar nav a:hover,.topbar nav a[aria-current]{color:var(--ink-l);border-color:var(--gold)}
 
 /* ---------- 首屏（首页）---------- */
-.hero{position:relative;height:100vh;height:100svh;min-height:600px;background:var(--ground);overflow:hidden;border-bottom:1px solid rgba(200,180,138,.22)}
 .media{position:absolute;inset:0}
 .media svg{width:100%;height:100%}
-.scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,9,.74) 0%,rgba(10,10,9,.14) 30%,rgba(10,10,9,0) 50%,rgba(10,10,9,.62) 84%,rgba(10,10,9,.94) 100%)}
-.hero-inner{position:absolute;left:0;right:0;bottom:clamp(72px,13vh,150px);z-index:3}
-.eyebrow{font-size:12.5px;letter-spacing:.14em;color:#DCC79C;margin-bottom:clamp(14px,2.4vh,26px)}
-.hero h1{color:var(--ink-l);font-weight:600;font-size:clamp(30px,5.1vw,76px);line-height:1.16;letter-spacing:-.015em;max-width:16em}
-.hero h1 span{display:block;text-wrap:balance}
-.hero .sub{margin-top:clamp(16px,2.6vh,30px);color:#C6C2B8;font-size:clamp(13.5px,1.05vw,15.5px);line-height:1.9}
-.hero-foot{position:absolute;left:0;right:0;bottom:clamp(22px,3.4vh,34px);z-index:3;display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:11.5px;color:#A9A499;letter-spacing:.06em}
-.hero-foot .down{display:inline-flex;align-items:center;gap:8px}
-.hero-foot .down i{font-style:normal;color:#DCC79C;font-size:12px;line-height:1}
 
 /* ---------- 区块头 ---------- */
 main{padding-top:clamp(48px,9vh,110px)}
@@ -60,36 +49,17 @@ main{padding-top:clamp(48px,9vh,110px)}
 .count{font-size:12px;color:var(--ink-d3);letter-spacing:.08em;margin-bottom:6px}
 
 /* ---------- 作品网格 ---------- */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.4vw,40px) clamp(12px,1.8vw,28px)}
 .work{display:block}
 .frame{position:relative;overflow:hidden;background:#1A1915}
 .frame svg{width:100%;height:100%;transition:transform .8s var(--ease)}
 .work .frame{aspect-ratio:2/1}
 .work:hover .frame svg{transform:scale(1.03)}
-.ph{position:absolute;right:8px;bottom:7px;font-size:10px;color:#B8B4A8;opacity:0;transition:opacity .3s}
-.work:hover .ph,.stage:hover .ph{opacity:1}
 .work .cap{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-top:11px}
 .work .cap b{font-weight:500;font-size:clamp(14px,1.15vw,16.5px);line-height:1.4}
 .work .cap i{font-style:normal;font-size:11.5px;color:var(--ink-d3);white-space:nowrap}
 .work:hover .cap b{color:var(--accent)}
 
-.all-line{margin-top:clamp(26px,3.6vh,44px);border-top:1px solid var(--rule-d);padding-top:16px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13.5px;color:var(--ink-d2)}
-.all-line a{border-bottom:1px solid var(--ink-d);color:var(--ink-d);padding-bottom:2px}
-.all-line a:hover{color:var(--accent);border-color:var(--accent)}
-
 /* ---------- 竖屏商业 ---------- */
-.vertical{padding-top:clamp(56px,10vh,120px)}
-.vgrid{display:grid;grid-template-columns:minmax(0,1.55fr) repeat(3,minmax(0,.8fr));gap:clamp(12px,1.8vw,28px);align-items:stretch}
-.vlead{display:flex;flex-direction:column;padding-bottom:2px}
-.vlead h2{font-weight:600;font-size:clamp(24px,2.6vw,40px);line-height:1.25;letter-spacing:-.01em;margin-bottom:16px}
-.vlead p{font-size:13.5px;line-height:1.9;color:var(--ink-d2);max-width:22em}
-.vstats{margin-top:auto;border-top:1px solid var(--rule-d);padding-top:14px;display:grid;gap:8px}
-.vstats div{display:flex;align-items:baseline;gap:10px;font-size:12.5px;color:var(--ink-d2)}
-.vstats b{font-weight:600;font-size:15px;color:var(--ink-d);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:5.4em}
-.vitem .frame{aspect-ratio:9/16}
-.vitem .cap{margin-top:10px}
-.vitem .cap b{display:block;font-weight:500;font-size:13.5px;line-height:1.4}
-.vitem .cap i{font-style:normal;font-size:11.5px;color:var(--ink-d3)}
 
 /* ---------- 工具表 ---------- */
 .tools{padding-top:clamp(56px,10vh,120px)}
@@ -99,48 +69,18 @@ td{padding:17px 16px 17px 0;border-bottom:1px solid var(--rule-d);vertical-align
 td.n{font-weight:500;white-space:nowrap;font-size:15px}
 td.n em{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-d3);margin-left:6px}
 td.s{color:var(--ink-d2);white-space:nowrap;font-size:12.5px}
-td.l a{border-bottom:1px solid var(--rule-d)}
-td.l a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ---------- 数字行 ---------- */
-.facts{padding:clamp(44px,7vh,86px) 0 clamp(20px,3vh,36px)}
-.facts p{font-size:clamp(13.5px,1.05vw,14.5px);color:var(--ink-d2);line-height:2.1;border-top:1px solid var(--rule-d);padding-top:16px;letter-spacing:.01em}
-.facts b{font-weight:600;color:var(--ink-d);font-variant-numeric:tabular-nums}
-.facts span{color:var(--ink-d3);margin:0 10px}
 
 footer{margin-top:clamp(16px,2.4vh,28px);padding:22px 0 48px;border-top:1px solid var(--rule-d);display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-d3)}
 footer a{border-bottom:1px solid var(--rule-d)}
 footer a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ---------- 作品详情页 ---------- */
-.stage{position:relative;height:100vh;height:100svh;min-height:560px;background:var(--ground);overflow:hidden}
-.stage .media{position:absolute;inset:0}
-.stage .scrim{background:linear-gradient(180deg,rgba(10,10,9,.6) 0%,rgba(10,10,9,.05) 26%,rgba(10,10,9,.1) 56%,rgba(10,10,9,.72) 84%,rgba(10,10,9,.96) 100%)}
-.stage-top{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;justify-content:space-between;align-items:baseline;gap:20px;font-size:12px;letter-spacing:.05em;color:#B7B3A8;padding-top:74px}
-.stage-top a{border-bottom:1px solid rgba(255,255,255,.22);padding-bottom:2px}
-.stage-top a:hover{color:var(--ink-l);border-color:var(--gold)}
-.stage-cap{position:absolute;left:0;right:0;bottom:clamp(60px,11vh,120px);z-index:3;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(20px,4vw,64px);align-items:end}
-.stage-cap h1{color:var(--ink-l);font-weight:600;font-size:clamp(30px,4.4vw,64px);line-height:1.14;letter-spacing:-.015em}
-.stage-cap p{margin-top:clamp(14px,2.2vh,24px);color:#CFCCC2;font-size:clamp(13.5px,1.05vw,15.5px);line-height:1.9;max-width:34em}
-.stage-meta{text-align:right;font-size:12px;line-height:2.1;color:#A9A499;white-space:nowrap}
-.stage-meta b{display:block;font-weight:500;color:var(--ink-l);font-size:13.5px;margin-bottom:2px}
-.stage-foot{position:absolute;left:0;right:0;bottom:clamp(20px,3vh,30px);z-index:3;display:flex;justify-content:space-between;gap:20px;font-size:11px;color:#7E7A6F;letter-spacing:.06em}
 
-.work-body{padding-top:clamp(44px,7vh,86px)}
-.wb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:clamp(20px,4vw,72px);align-items:start}
-.wb-grid h2{font-weight:600;font-size:clamp(20px,2vw,28px);line-height:1.35}
-.wb-grid .label{font-size:11.5px;color:var(--ink-d3);letter-spacing:.08em;margin-bottom:10px}
-.wb-text p{font-size:15px;line-height:2;color:#3A3931;margin-bottom:1.1em}
-.wb-text p:last-child{margin-bottom:0}
 .spec{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 20px;margin-top:clamp(28px,4vh,44px);border-top:1px solid var(--rule-d);padding-top:16px}
 .spec dt{font-size:11.5px;color:var(--ink-d3);margin-bottom:4px}
 .spec dd{font-size:13.5px;line-height:1.6}
-.pager{margin-top:clamp(40px,6vh,80px);border-top:1px solid var(--rule-d);display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.pager a{padding:22px 0;display:block}
-.pager a + a{text-align:right}
-.pager .k{font-size:11.5px;color:var(--ink-d3);letter-spacing:.08em;display:block;margin-bottom:6px}
-.pager .t{font-weight:500;font-size:clamp(16px,1.5vw,22px);transition:color .2s}
-.pager a:hover .t{color:var(--accent)}
 
 /* ---------- 作品列表页 ---------- */
 .list-page{padding-top:clamp(96px,14vh,150px)}
@@ -165,45 +105,15 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
 .list-grid .cap i{font-style:normal;font-size:12px;color:var(--ink-d3);white-space:nowrap}
 .list-grid a:hover .cap b{color:var(--accent)}
 /* 没有真实链接的条目不做成可点的样子——宁可不点，也不要点了没反应。 */
-.list-grid a.nolink{cursor:default}
-.list-grid a.nolink:hover .cap b{color:inherit}
-.cat-nav{display:flex;gap:clamp(12px,2vw,24px);font-size:13px;color:var(--ink-d3);margin-bottom:clamp(22px,3vh,34px);flex-wrap:wrap}
-.cat-nav span{color:var(--ink-d);border-bottom:1px solid var(--ink-d);padding-bottom:2px}
-.cat-nav em{font-style:normal}
-.contact-grid a.nolink{cursor:default}
-.contact-grid a.nolink:hover b{color:inherit}
 
 /* ---------- 关于页 ---------- */
-.about-page{padding-top:clamp(96px,14vh,150px)}
-.about-lead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(24px,4vw,72px);align-items:start}
-.about-lead h1{font-weight:600;font-size:clamp(26px,3.2vw,46px);line-height:1.3;letter-spacing:-.01em}
-.about-lead .body p{font-size:15.5px;line-height:2.05;color:#33322B;margin-bottom:1.2em}
-.about-lead .body p:last-child{margin-bottom:0}
 .timeline{margin-top:clamp(48px,7vh,92px);border-top:1px solid var(--ink-d)}
-.timeline .row{display:grid;grid-template-columns:clamp(96px,12vw,150px) minmax(0,1fr) minmax(0,1.1fr);gap:clamp(12px,2.4vw,40px);padding:20px 0;border-bottom:1px solid var(--rule-d);align-items:baseline}
-.timeline .yr{font-size:12.5px;color:var(--ink-d3);font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.timeline .org{font-weight:500;font-size:15px}
-.timeline .org em{font-style:normal;display:block;font-weight:400;font-size:12.5px;color:var(--ink-d3);margin-top:2px}
-.timeline .what{font-size:13.5px;color:var(--ink-d2);line-height:1.85}
-.contact-block{margin-top:clamp(48px,7vh,92px);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:clamp(16px,2.4vw,32px);border-top:1px solid var(--ink-d);padding-top:22px}
-.contact-block h2{font-size:11.5px;color:var(--ink-d3);letter-spacing:.08em;margin-bottom:8px;font-weight:400}
-.contact-block a{font-size:14px;border-bottom:1px solid var(--rule-d);padding-bottom:2px}
-.contact-block a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ---------- 响应式 ---------- */
 @media (max-width:1080px){
-  .grid{grid-template-columns:repeat(2,1fr)}
-  .vgrid{grid-template-columns:repeat(3,1fr)}
-  .vlead{grid-column:1/-1;margin-bottom:8px}
-  .sec-head{grid-template-columns:1fr;gap:12px}
-  .about-lead{grid-template-columns:1fr;gap:20px}
-  .wb-grid{grid-template-columns:1fr;gap:20px}
-  .spec{grid-template-columns:1fr 1fr;gap:14px 20px}
-  .stage-cap{grid-template-columns:1fr;gap:16px}
-  .stage-meta{text-align:left;display:flex;gap:20px;flex-wrap:wrap;line-height:1.7;white-space:normal}
-  .stage-meta b{display:inline;margin:0 6px 0 0}
-  .timeline .row{grid-template-columns:1fr;gap:4px}
-}
+        .sec-head{grid-template-columns:1fr;gap:12px}
+      .spec{grid-template-columns:1fr 1fr;gap:14px 20px}
+        }
 @media (max-width:640px){
   .topbar{position:static;background:var(--ground);border-bottom:0}
   /* 一级页首屏是满屏影像：顶栏浮在上面，别把 100svh 顶出视口 */
@@ -211,90 +121,30 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
   .topbar .in{padding:14px var(--m) 10px}
   .mark span{display:none}
   .topbar nav{gap:14px;font-size:12.5px}
-  .hero-inner{position:absolute;bottom:90px}
-  .hero h1{font-size:clamp(24px,6.5vw,36px);letter-spacing:-.02em}
-  .hero .sub{margin-top:14px;font-size:13px;line-height:1.85}
-  .hero .sub br.d{display:none}
-  .eyebrow{font-size:11.5px;margin-bottom:14px}
-  .hero-foot{font-size:10.5px;bottom:20px}
-  .grid{grid-template-columns:1fr}
-  .list-grid{grid-template-columns:1fr}
+                .list-grid{grid-template-columns:1fr}
   /* 单列之后「通栏」这个概念已经没了，标题必须回到同一档。
      不回的话，前三张 17px、后面六张 15px，读者只会觉得是漏改。 */
   .list-grid a.is-wide .cap b{font-size:clamp(15px,1.3vw,19px);letter-spacing:0}
-  .vgrid{grid-template-columns:repeat(3,1fr);gap:10px}
-  .vstats{grid-template-columns:1fr 1fr;gap:6px 14px}
-  .vstats div{font-size:12px}
-  .vstats b{font-size:13.5px;min-width:0}
-  .vitem .cap i{display:none}
-  table,thead,tbody,tr,td,th{display:block}
+            table,thead,tbody,tr,td,th{display:block}
   thead{display:none}
   tr{padding:15px 0;border-bottom:1px solid var(--rule-d)}
   td{border:0;padding:2px 0}
-  .all-line{flex-direction:column;gap:10px}
-  .stage-top{padding-top:26px;font-size:11px}
-  .stage-cap h1{font-size:clamp(26px,8vw,40px)}
-  .pager{grid-template-columns:1fr}
-  .pager a + a{text-align:left;border-top:1px solid var(--rule-d)}
-  footer{flex-direction:column;gap:6px}
+            footer{flex-direction:column;gap:6px}
 }
 
 /* ============ 一级页：简介入口 ============ */
-.intro-inner{position:absolute;left:0;right:0;bottom:clamp(72px,12vh,140px);z-index:3}
-.entries{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,2vw,32px);margin-top:clamp(28px,4.4vh,50px);border-top:1px solid rgba(255,255,255,.16);padding-top:clamp(16px,2.2vh,22px)}
-.entries a{display:block;color:var(--ink-l)}
-.entries b{display:block;font-weight:500;font-size:clamp(16px,1.4vw,20px);transition:color .2s}
-.entries i{display:block;font-style:normal;font-size:11.5px;color:#8E8A7F;margin-top:5px;letter-spacing:.02em}
-.entries a:hover b{color:var(--gold)}
 
 /* ============ 二级页公共 ============ */
 .list-page,.resume-page,.tools-page,.contact-page{padding-top:clamp(96px,13vh,146px);padding-bottom:clamp(48px,7vh,90px)}
 /* 联系页内容少，把收尾那句压到底，空的那段就变成留白而不是断掉 */
 .contact-page{display:flex;flex-direction:column}
-.contact-page .facts{margin-top:auto}
-.contact-page .facts p{font-size:clamp(14px,1.15vw,15.5px);color:var(--ink-d2)}
-.contact-note{padding-top:clamp(40px,7vh,84px);max-width:52ch}
-.contact-note p{font-size:clamp(13.5px,1.05vw,14.5px);line-height:2.1;color:var(--ink-d2)}
 
 /* 简历 */
 .timeline{margin-top:clamp(32px,4.6vh,56px);border-top:1px solid var(--ink-d)}
-.timeline .row.head{border-bottom:1px solid var(--ink-d);font-size:11px;color:var(--ink-d3);letter-spacing:.07em;padding:10px 0}
-.timeline .row.head .org,.timeline .row.head .what{font-size:11px;color:var(--ink-d3)}
-.resume-cols{margin-top:clamp(44px,6vh,80px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,3.6vw,56px);border-top:1px solid var(--ink-d);padding-top:22px}
-.resume-cols h2{font-size:11.5px;letter-spacing:.08em;color:var(--ink-d3);font-weight:400;margin-bottom:14px}
-.edu{display:grid;gap:4px}
-.edu b{font-weight:500;font-size:15px}
-.edu span{font-size:13px;color:var(--ink-d2)}
-.tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
-.tags li{font-size:12.5px;color:var(--ink-d2);border:1px solid var(--rule-d);padding:4px 10px}
-.tags.plain{display:block}
-.tags.plain li{border:0;padding:0;font-size:13px;line-height:2}
 
 /* 软件 */
-.tools-note{margin-top:clamp(26px,3.6vh,42px);font-size:13.5px;color:var(--ink-d2);line-height:1.95;max-width:46em}
 
 /* 联系 */
-.contact-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,2.4vw,32px);border-top:1px solid var(--ink-d);padding-top:22px}
-.contact-grid a{display:block;padding:6px 0}
-.contact-grid h2{font-size:11.5px;letter-spacing:.08em;color:var(--ink-d3);font-weight:400;margin-bottom:10px}
-.contact-grid b{display:block;font-weight:500;font-size:16px;margin-bottom:4px;transition:color .2s}
-.contact-grid i{font-style:normal;font-size:12.5px;color:var(--ink-d3)}
-.contact-grid a:hover b{color:var(--accent)}
-
-@media (max-width:1080px){
-  .resume-cols{grid-template-columns:1fr 1fr;gap:28px}
-  .contact-grid{grid-template-columns:1fr 1fr}
-}
-@media (max-width:640px){
-  .intro-inner{bottom:clamp(86px,11vh,124px);top:auto;left:0;right:0}
-  .intro-inner .sub{font-size:13px;margin-top:12px}
-  .entries{grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:26px}
-  .entries b{font-size:16px}
-  .entries i{font-size:11px}
-  .resume-cols{grid-template-columns:1fr;gap:26px}
-  .contact-grid{grid-template-columns:1fr 1fr;gap:20px}
-  .timeline .row{padding:16px 0}
-}
 
 /* 二级页浅色顶栏。
    0.88 的米白底下会透出正文的暗字，滚过去时顶栏里浮着一层能认出来的字，
@@ -316,7 +166,6 @@ body.inner .mark span{color:var(--ink-d2)}
 body.inner .topbar nav{color:var(--ink-d2)}
 body.inner .topbar nav a:hover,body.inner .topbar nav a[aria-current]{color:var(--ink-d);border-color:var(--accent)}
 /* 时间线列宽 */
-.timeline .row{grid-template-columns:clamp(96px,11vw,144px) minmax(0,.85fr) minmax(0,1.45fr)}
 
 /* ============ 无障碍与降级 ============ */
 /* 键盘用户看得见焦点，鼠标用户不受打扰 */
@@ -330,7 +179,6 @@ body:not(.inner) :focus-visible{outline-color:var(--gold)}
   .work:hover .frame svg{transform:none}
 }
 /* 时间线最后一行的下边框会和下一块的顶边框叠成两条线，去掉一条 */
-.timeline .row:last-child{border-bottom:0}
 
 /* ============================================================
    一级页：署名
@@ -340,85 +188,19 @@ body:not(.inner) :focus-visible{outline-color:var(--gold)}
 
 body.dark{background:#000;color:#FAFAF7}
 
-.gate{
-  position:relative;
-  min-height:100vh;min-height:100svh;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:clamp(48px,10vh,120px) var(--m);
-  text-align:center;
-  overflow:hidden;
-}
-
 /* 姓名 + 倒影。倒影用绝对定位，不占布局高度 */
-.sign{
-  position:relative;display:block;
-  font-size:clamp(76px,15.5vw,224px);
-  /* 字体只到 Semibold，写 700 会让浏览器合成假粗体（描边式、发虚），
-     所以用真 600，再用极细描边补一点重量。 */
-  font-weight:600;
-  -webkit-text-stroke:.016em currentColor;
-  line-height:1;letter-spacing:-.05em;
-  color:#FAFAF7;
-}
-.sign-t{display:block}
 /* 倒影：不用 mask（会被 scaleY 一起翻，方向容易搞反），
    改在倒影内部盖一层黑渐变——翻转后自然就是"贴身处清楚、往下淡出"。 */
-.sign-r{
-  position:absolute;left:0;right:0;top:100%;
-  display:block;
-  /* 绕中心翻（绕顶边翻会把内容推到主字上方）。遮罩按元素自身坐标算：
-     底部不透明、顶部透明，翻转后就是"紧贴主字处清楚、往下淡出"。 */
-  transform:scaleY(-1);transform-origin:center;
-  color:#FAFAF7;opacity:.14;
-  pointer-events:none;user-select:none;
-  -webkit-mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,0) 40%);
-  mask-image:linear-gradient(to top,#000 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,0) 40%);
-}
 
 /* 身份：名词并列，字距拉开，不解释 */
-.role{
-  margin-top:clamp(124px,18vh,200px);
-  font-size:clamp(12px,1.1vw,14.5px);
-  letter-spacing:.22em;text-indent:.22em;
-  color:#8C887E;font-weight:400;
-}
-
-.gate-nav{
-  margin-top:clamp(26px,4.2vh,50px);
-  display:flex;gap:clamp(30px,5vw,72px);
-}
-.gate-nav a{
-  font-size:clamp(12.5px,1.02vw,14px);
-  letter-spacing:.18em;text-indent:.18em;
-  color:#9A958B;
-  transition:color .4s var(--ease);
-}
-.gate-nav a:hover{color:#FAFAF7}
 
 /* 入场：慢一点，只做一次 */
 @keyframes gateIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.sign,.role,.gate-nav{animation:gateIn 1.15s var(--ease) both}
-.role{animation-delay:.14s}
-.gate-nav{animation-delay:.28s}
-
-@media (max-width:900px){
-  .sign{font-size:clamp(68px,17vw,150px)}
-  .role{margin-top:clamp(58px,10vh,110px);letter-spacing:.38em;text-indent:.38em}
-}
-@media (max-width:640px){
-  .sign{font-size:clamp(62px,20vw,110px);letter-spacing:-.04em}
-  .role{margin-top:clamp(48px,9vh,84px);font-size:12px;letter-spacing:.3em;text-indent:.3em}
-  .gate-nav{margin-top:clamp(38px,7vh,64px);gap:clamp(20px,7vw,34px)}
-  .gate-nav a{font-size:12.5px;letter-spacing:.16em;text-indent:.16em}
-}
 
 /* 占位图统一压暗去饱和：八张各唱各的调，看着像廉价滤镜 */
 .list-grid .frame svg{filter:saturate(.6) brightness(.92)}
 
 /* 联系页内容少，四块撑高一点，别让页面空掉 */
-.contact-grid a{padding:clamp(16px,2.6vh,30px) 0}
-.contact-grid b{font-size:clamp(17px,1.42vw,21px)}
 
 /* ============================================================
    场景首页（sc- 前缀，与旧版深色首屏的 .hero / .stage 彻底隔开）
@@ -741,7 +523,6 @@ body.dark{background:#0B0F12}
    用 opacity 不用 display：留着它的高度，悬停时字幕块不会突然长高、片名不会跳。 */
 .sc-card .cap i{display:block;font-style:normal;font-size:9.5px;color:rgba(242,240,234,.6);margin-top:3px;opacity:0;transition:opacity .3s linear}
 .sc-card:hover .cap i{opacity:1}
-
 
 /* ---------- 入场 ---------- */
 @keyframes sc-rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
@@ -1593,7 +1374,6 @@ html.snap{
 }
 
 /* 老浏览器不认 safe 时的兜底：内容超一屏就顶对齐（由 scroll.js 打上这个类） */
-.bz-pane.is-tall{justify-content:flex-start}
 
 /* 内层容器原来的上下内边距由 section 接管，不然两处相加会顶出一大截空白。
    width:100% 不能省：.bz-pane 是 flex 容器，.wrap 带着 margin:0 auto 就成了
@@ -1657,7 +1437,6 @@ body.inner .bz-pane .contact-page{
   padding-top:0;
   padding-bottom:0;
 }
-.bz-pane .contact-page .facts{margin-top:clamp(28px,5vh,56px)}
 
 /* 屏与屏之间一条极淡的分隔，给「换章节了」一个视觉信号。
    原来透明度跟着 --vis 变；现在固定成 .55 —— 一条本来就极淡的线，
