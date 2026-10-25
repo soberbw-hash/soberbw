@@ -144,8 +144,22 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
 
 /* ---------- 作品列表页 ---------- */
 .list-page{padding-top:clamp(96px,14vh,150px)}
-.list-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3.6vw,56px) clamp(16px,2.4vw,36px)}
+.list-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4.2vw,64px) clamp(16px,2.4vw,36px)}
 .list-grid .frame{aspect-ratio:2/1}
+
+/* 通栏那三张（第 1、4、9 部）：占满两列，标题也跟着提一档。
+   编辑式排版里尺寸本身就是层级——图大一号，标题也该大一号，
+   否则一张 1360px 宽的图下面挂着 19px 的字，看上去像忘了调。
+
+   为什么只做「通栏」和「半栏」两种宽度、不玩 2/3 + 1/3：
+   源图全是 2:1。宽度比例一变，要么裁掉构图（7:5 的两张并排，
+   窄的那张得裁成 2.86:1），要么两张卡高度不一样、底下空一块。
+   两个尺寸已经足够打断「六张一样大」的模板感，再多就是拿构图换花样。 */
+.list-grid a.is-wide{grid-column:1/-1}
+/* 只补宽度、不动字号：给「两列网格里最后一张孤卡」收口用。 */
+.list-grid a.is-fill{grid-column:1/-1}
+.list-grid a.is-wide .cap{margin-top:clamp(14px,1.9vh,22px)}
+.list-grid a.is-wide .cap b{font-size:clamp(17px,1.72vw,26px);letter-spacing:-.012em}
 .list-grid .cap{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-top:12px}
 .list-grid .cap b{font-weight:500;font-size:clamp(15px,1.3vw,19px)}
 .list-grid .cap i{font-style:normal;font-size:12px;color:var(--ink-d3);white-space:nowrap}
@@ -205,6 +219,9 @@ footer a:hover{color:var(--accent);border-color:var(--accent)}
   .hero-foot{font-size:10.5px;bottom:20px}
   .grid{grid-template-columns:1fr}
   .list-grid{grid-template-columns:1fr}
+  /* 单列之后「通栏」这个概念已经没了，标题必须回到同一档。
+     不回的话，前三张 17px、后面六张 15px，读者只会觉得是漏改。 */
+  .list-grid a.is-wide .cap b{font-size:clamp(15px,1.3vw,19px);letter-spacing:0}
   .vgrid{grid-template-columns:repeat(3,1fr);gap:10px}
   .vstats{grid-template-columns:1fr 1fr;gap:6px 14px}
   .vstats div{font-size:12px}
