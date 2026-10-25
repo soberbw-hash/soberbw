@@ -492,11 +492,35 @@ body.dark{background:#0B0F12}
    常态整条带子只有满幅的 84%，光标压住的那张才弹回满幅。 */
 .sc-rail{
   position:absolute;right:0;top:0;bottom:0;z-index:7;
-  width:var(--rail-w);
-  overflow:hidden;
+  /* 左边多留 120px 空跑（用 padding-left 补回去，卡片位置一点不动）。
+     为什么：卡片的 box-shadow 一直铺到 rail 边框盒之外，而遮罩和
+     overflow:hidden 都在边框盒上切一刀，切出来是一条笔直的竖边——
+     悬停放大时阴影变长，这条边就露出来了。
+     把盒子往左撑开 120px 之后，那一刀落在离卡片 120px 外的地方，
+     阴影在那里已经很淡；再叠一道 100px 的水平淡入，连这刀都看不出来。
+     用固定 px 而不是百分比：卡片悬停时会正好长到 rail 的内宽（HOVER = 1/QUIET），
+     百分比淡入在窄屏上会把卡片自己的左边一起淡掉。 */
+  width:calc(var(--rail-w) + 120px);
+  padding-left:120px;
   padding-right:clamp(0px,2.2vw,34px);
+  overflow:hidden;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%);
   mask-image:linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%);
+}
+/* 左边再加一道水平淡入。两层遮罩必须用 mask-composite:intersect 取交集；
+   不支持的浏览器会退回默认的 add（并集），那样上下淡出就整个失效了——
+   所以放进 @supports：宁可没有左淡入，也不能丢上下淡出。 */
+@supports (mask-composite:intersect){
+  .sc-rail{
+    -webkit-mask-image:
+      linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%),
+      linear-gradient(90deg,transparent 0,#000 100px);
+    mask-image:
+      linear-gradient(180deg,transparent 0,#000 12%,#000 88%,transparent 100%),
+      linear-gradient(90deg,transparent 0,#000 100px);
+    -webkit-mask-composite:source-in;
+    mask-composite:intersect;
+  }
 }
 .sc-track{
   position:absolute;inset:0;
