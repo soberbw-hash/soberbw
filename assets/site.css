@@ -668,8 +668,10 @@ body.dark{background:#0B0F12}
    左右各切掉一大半，人物经常只剩半张脸。竖着排，卡就是 2:1，
    跟原片一比一，一个像素都不用裁。
 
-   形状也不再是「圆柱内壁」，改成一列匀速上移的胶片：
-   上下用遮罩淡出，越靠边缩得越小一点，像往远处退。 */
+   形状：一列匀速上移的胶片，上下用遮罩淡出。卡片的大小和倾角每帧由脚本算
+   （见 app.js 的 TAPER / TILT）：中间最小、往上下两端长回来，同时上方逆时针、
+   下方顺时针转一点——看上去像一条被弯起来的带子，中间那段退得最远。
+   常态整条带子只有满幅的 84%，光标压住的那张才弹回满幅。 */
 .sc-rail{
   position:absolute;right:0;top:0;bottom:0;z-index:7;
   width:var(--rail-w);
@@ -719,7 +721,12 @@ body.dark{background:#0B0F12}
     0 8px 22px -6px rgba(0,0,0,.45);
 }
 .sc-card .cap b{display:block;font-weight:500;font-size:12.5px;line-height:1.35;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sc-card .cap i{display:block;font-style:normal;font-size:9.5px;color:rgba(242,240,234,.6);margin-top:3px}
+/* 片名底下那行（片种 / 场次）常态不显示。
+   卡片常态缩到 84%，9.5px 乘下来只剩 8px——那不是「小」，是糊成一条灰线。
+   抽出来的时候卡片回到满幅，这行字才有地方站，也才有意义（平时只需要认出是哪部）。
+   用 opacity 不用 display：留着它的高度，悬停时字幕块不会突然长高、片名不会跳。 */
+.sc-card .cap i{display:block;font-style:normal;font-size:9.5px;color:rgba(242,240,234,.6);margin-top:3px;opacity:0;transition:opacity .3s linear}
+.sc-card:hover .cap i{opacity:1}
 
 /* 左下角一行极小的版权：字排到中间之后，底下一大片空，加这一行把角压住 */
 .sc-foot{
