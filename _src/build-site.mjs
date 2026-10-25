@@ -578,7 +578,7 @@ function layout({ title, desc, depth = 0, current = '', body, bodyClass = '', ba
 <link rel="icon" href="${p}assets/favicon-16.png?v=${ASSET_V}" sizes="16x16" type="image/png">
 <link rel="icon" href="${p}assets/favicon-32.png?v=${ASSET_V}" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="${p}assets/apple-touch-icon.png?v=${ASSET_V}">
-${path === '' ? `<link rel="preload" href="${p}fonts/display/sans-name-800.woff2" as="font" type="font/woff2" crossorigin>` : ''}
+${path === '' ? `<link rel="preload" href="${p}fonts/display/sans-name-700.woff2" as="font" type="font/woff2" crossorigin>` : ''}
 <link rel="stylesheet" href="${p}fonts/harmonyos/Regular.css">
 <link rel="stylesheet" href="${p}fonts/harmonyos/Medium.css">
 <link rel="stylesheet" href="${p}fonts/harmonyos/Semibold.css">

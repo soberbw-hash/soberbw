@@ -372,26 +372,25 @@ body.dark{background:#0B0F12}
   width:clamp(18px,2.4vw,34px);height:1px;
   background:rgba(198,240,74,.62);
 }
-/* 名字用思源黑体 800（Noto Sans SC）。只子集了「尤博文」三个字，4KB——
+/* 名字用思源黑体 700（Noto Sans SC）。只子集了「尤博文」三个字，4KB——
    中文展示字体动辄十几兆，但这里只排三个字，没必要把整副字库搬上来。
 
-   这行字换过三次，留个记录：
+   这行字换过四次，留个记录：
    1. 手写行书（志莽行书）——问题不是「不够艺术」，是「不够可信」：三个字
       大小不齐、重心各异，放到 216px 之后第一眼像签名草稿而不是名字，
       「博」尤其难认。简历网站的第一屏就是这行字，认不出来就是失职。
    2. 思源宋体 800——高对比、有衬线，像电影片头。但字号一大，横细竖粗那套
       对比反而显得「瘦而尖」，笔画在照片背景上发飘，用户看下来觉得「怪」。
-   3. 现在换成思源黑体 800：笔画粗细一致、重心方正，整块字压在明暗交错的
-      云层上最扎实，也不会跟下面那行手写签名（You Bowen）抢戏。
+   3. 思源黑体 800：笔画粗细一致、重心方正，整块字压在明暗交错的云层上最扎实。
+   4. 思源黑体 700（现在）：800 撑到 300px 之后，横竖笔画都偏厚，整块字看着
+      「闷」——用户的原话是「有点粗了」。降一档到 700，笔画的粗细差立刻回来了，
+      「博」里那些小横之间透出气来；再往下到 600 就发飘，在照片上压不住。
 
-   800 而不是 900：900 在大字号上偏「钝」，「博」里的十和「文」的那一横
-   会挤成一团，像促销条幅；700 又偏轻，在照片上压不住。800 在两头之间。
-
-   字重写死 400（字体文件里已经是 800 的轮廓），并且 font-synthesis:none：
+   字重写死 400（字体文件里已经是 700 的轮廓），并且 font-synthesis:none：
    浏览器一旦合成加粗，字形会被算法再描一遍，边缘发糊。 */
 @font-face{
   font-family:'Site Display';
-  src:url('../fonts/display/sans-name-800.woff2') format('woff2');
+  src:url('../fonts/display/sans-name-700.woff2') format('woff2');
   font-weight:400;font-style:normal;font-display:swap;
 }
 .sc-hero h1{
@@ -490,18 +489,44 @@ body.dark{background:#0B0F12}
   display:block;
   background:#141813;
   overflow:hidden;
-  border-radius:4px;
+  /* 圆角从 4px 提到 12px。
+     4px 在 393px 宽的卡上等于 1%——肉眼就是直角，卡片像直接从网页上抠下来的。
+     12px 在常态（缩放 0.8–1.0）下看着是 10–12px，读得出「这是一张有厚度的卡」，
+     又没到 20px 那种 App 卡片的程度——那样会把胶片感洗掉。 */
+  border-radius:12px;
+  /* 影子分四层，各干各的活：
+       · 1px 2px   —— 接触影。卡片和背景之间那一线，没有它卡片像浮在半空；
+       · 6px 14px  —— 近影。物体自己的体积；
+       · 20px 40px —— 中景，把卡片从背景上「托起来」，立体感主要来自这一层；
+       · 44px 88px —— 远影，铺开一圈很淡的暗，负责「这里有一块东西」的整体感。
+     原来只有一条 `0 20px 44px -26px`：偏移 20px 配 -26px 的收束，等于把影
+     缩成一小片垫在卡片正下方，深色背景上根本看不见。负 spread 要慎用，
+     它收的是影子本身，不是「收紧」的意思。
+
+     横向偏移 4px 而不是纯垂直：背景那片云的光从左上打过来，影子跟着往右下走
+     才对得上。纯垂直的影子会让人觉得卡片和背景不是同一个空间里的。 */
   box-shadow:
-    0 20px 44px -26px rgba(0,0,0,.78),
-    inset 0 0 0 1px rgba(255,255,255,.07);
+    4px 1px 2px rgba(0,0,0,.62),
+    4px 6px 14px -3px rgba(0,0,0,.58),
+    5px 20px 40px -14px rgba(0,0,0,.64),
+    6px 44px 88px -32px rgba(0,0,0,.72);
   will-change:transform;
   backface-visibility:hidden;
 }
 .sc-card .art{position:absolute;inset:0}
 .sc-card .art img{width:100%;height:100%;object-fit:cover;display:block}
+/* 压暗渐变 + 亮边，都挂在这一层上。
+   为什么亮边必须写在 ::after 而不是父级的 inset box-shadow：inset 影画在
+   背景之上、子元素之下，而 ::after 正盖在照片上——写父级会被 ::after 的
+   压暗渐变吃掉，尤其是下沿那一段（那里渐变不透明度已经到 .92）。
+   光从上方来，所以上沿最亮（1px 实边）、四周只留一圈很淡的轮廓。 */
 .sc-card::after{
   content:"";position:absolute;inset:0;pointer-events:none;
+  border-radius:inherit;
   background:linear-gradient(180deg,rgba(8,12,10,0) 40%,rgba(8,12,10,.32) 66%,rgba(8,12,10,.92) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 0 0 1px rgba(255,255,255,.09);
 }
 .sc-card .cap{
   position:absolute;left:16px;right:16px;bottom:13px;z-index:2;color:#F2F0EA;
@@ -836,10 +861,23 @@ body.dt-page>main{width:100%;padding-top:0}
 /* 悬停：光标压住的那张微微放大，字幕化成一小片玻璃，其余整条带子暗下去。
    放大不用 CSS 的 transform——每帧的 transform 是脚本写的，写死的 :hover 会被
    行内样式盖掉，所以倍率在脚本里乘（见 app.js 的 hoverEl）。 */
-.sc-card{
-  transition:filter .45s ease;
+/* 抽出来的那张再抬一层：近影收紧、远影铺开，等于「离背景更远」。
+   光有放大没有影子变化，放大就只是变大，不是往前。
+   transition 不写在这里——文件末尾那条 `.sc-card{transition:...}` 在后面，
+   同权重会被它整个盖掉，两处都写只会让人以为这里生效。 */
+.sc-card:hover{
+  z-index:9;filter:none;
+  box-shadow:
+    4px 2px 5px rgba(0,0,0,.52),
+    6px 14px 30px -8px rgba(0,0,0,.55),
+    8px 30px 56px -18px rgba(0,0,0,.62),
+    10px 64px 120px -40px rgba(0,0,0,.7);
 }
-.sc-card:hover{z-index:9;filter:none}
+.sc-card:hover::after{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.32),
+    inset 0 0 0 1px rgba(255,255,255,.13);
+}
 .sc-card:hover .cap b{color:#fff}
 .sc-card .cap b{transition:color .35s}
 /* 被压住的那张亮起来，邻卡稍暗一点，视线才集中 */
