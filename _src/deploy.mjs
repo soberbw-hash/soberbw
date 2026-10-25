@@ -82,7 +82,7 @@ for (const name of readdirSync(SITE)) {
    目录名带下划线，GitHub Pages 的 Jekyll 会跳过它，所以不会当成页面发布出去
    ——但它在仓库里，clone 得到。 */
 mkdirSync(join(TARGET, '_src'), { recursive: true });
-for (const f of ['build-site.mjs', 'deploy.mjs']) {
+for (const f of ['build-site.mjs', 'deploy.mjs', 'linkcheck.mjs']) {
   cpSync(join('tools', f), join(TARGET, '_src', f), { force: true });
 }
 

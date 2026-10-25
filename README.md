@@ -1,6 +1,16 @@
 # 尤博文的个人主页
 
-纯静态影像作品集。没有框架、没有构建工具链、没有 `npm install`，一个 Node 脚本把内容拼成 HTML。
+影像创作者的作品集 —— 导演 / 剪辑。15 个页面，纯静态。
+
+**[→ 打开站点](https://soberbw-hash.github.io/soberbw/)**
+　·　[作品](https://soberbw-hash.github.io/soberbw/work.html)
+　·　[简历](https://soberbw-hash.github.io/soberbw/resume.html)
+　·　[软件](https://soberbw-hash.github.io/soberbw/tools.html)
+　·　[联系](https://soberbw-hash.github.io/soberbw/contact.html)
+
+![首页：左边巨型姓名，右边竖着走的胶片](img/readme-cover.jpg)
+
+没有框架、没有构建工具链、没有 `npm install` —— 一个 Node 脚本把内容拼成 HTML。
 
 ---
 
@@ -12,8 +22,11 @@
 | 目标域名 | `soberbw.cn` —— **还没绑定**（DNS 未配置），所以现在只有上面那个 github.io 地址能打开 |
 | 页面数 | 15：首页 / 作品 / 简历 / 软件 / 联系 / 滚动浏览（browse）+ 9 个作品详情 |
 | 部署方式 | GitHub Pages，`main` 分支，推上去约 1 分钟自动生效 |
+| 资源指纹 | `site.css?v=532bec43`、`app.js?v=532bec43` —— 线上跑的是不是这一版，看这两个值 |
 
 `canonical`、`og:url`、`sitemap.xml` 里写的都已经是 `https://soberbw.cn`。域名一绑上，这些就自动对上了；在那之前，它们指向一个还打不开的地址。
+
+> 上面那张封面图 `img/readme-cover.jpg` 是 1920×1326 的线上截图缩到 1440 宽，只用在这份 README 里，页面本身不引用它。改了首页外观之后想换封面，重截一张、同样缩到 1440 覆盖即可。
 
 ### 最近一次改版改了什么（2026-10-26，片带的立体感 + 滚轮惯性 + 名字字重 + 左边缘）
 
@@ -223,6 +236,14 @@ node _src/build-site.mjs        # 重新生成全部 HTML
 ---
 
 ## 七、改完怎么确认没坏
+
+**第一步，先扫链接**（最便宜，能抓到 90% 的手误）：
+
+```bash
+node _src/linkcheck.mjs      # 扫全部 365 条站内 href/src，缺文件就打印 MISS 并返回 1
+```
+
+它认 `?v=` 指纹和 `#hash`，也跳过 `http(s):` / `mailto:` / `tel:` / `data:`。改完 `ALL_ORDER`、挪了图、改了 slug，先跑这一句。
 
 **最低限度**：把 15 个页面都点一遍，看控制台有没有报错。
 
