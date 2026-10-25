@@ -243,7 +243,11 @@ body.dark{background:#0B0F12}
   position:absolute;inset:0;z-index:0;pointer-events:none;
   width:100%;height:100%;object-fit:cover;object-position:44% 46%;
   transform:translate(2%,-8%) scale(1.5);
-  filter:blur(3px) saturate(.80) brightness(.80) contrast(1.02);
+  /* brightness 从 .80 提到 .86：片子左边是悬浮岛的背光面，本身就是一大块近黑；
+     再乘 .80 之后直接压死成纯黑，跟旁边的亮云之间只剩一条边界，看着像一条黑边。
+     提回来一点，那块暗部里还能看出一点岩石和草的层次——有层次的暗才是「暗」，
+     没有层次的黑就是「边」。 */
+  filter:blur(3px) saturate(.84) brightness(.86) contrast(1.02);
   opacity:.79;
   /* 整幅铺满，下缘不再淡出。
      原来这里有一条 46% 往下渐隐的 mask，是为了让片子亮部别在卡片带后面糊成雾，
@@ -257,12 +261,27 @@ body.dark{background:#0B0F12}
 /* 折射滤镜的定义体，不占布局 */
 .sc-defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
 
-/* 顶部压暗 + 四角压暗，保证白字在任何云层上都读得出来 */
+/* 顶部压暗 + 左侧压暗 + 四角压暗，保证白字在任何云层上都读得出来
+
+   左边这一条改过两处，都是为了消掉用户圈出来的那条「黑边」：
+
+   1. 原来写的是 100deg，等值线是斜的（倾斜 10°）——1326px 高的屏上，
+      暗带边界从上到下横向差了 234px。一个「左边压暗」用斜渐变是错的，
+      边界看着就是一条斜着切过去的暗带。改成 90deg。
+   2. 最关键的一条：渐变最左端直接落到页面底色 #0B0F12，再在 12% 内化开。
+      片子左边本来就有一条亮云（悬浮岛左边、岛外的天），它正好贴着视口边缘，
+      旁边紧挨着岛子的背光暗部——一亮一黑贴着边框并排，就成了「一条黑边」。
+      把最外那几十像素直接换成页面底色之后，边框和页面是同一个颜色，
+      不可能再有缝；亮条被压在化开的过渡里，看不见了。
+      代价是左边缘比原来更暗一点，但它是「均匀地暗」，不是「有边界的黑」。
+      过渡只做 12%（约 230px）：再宽会把左下角那片雾也一起压平，
+      而那片雾是画面里唯一有空气感的地方。 */
 .sc-veil{
   position:absolute;inset:0;z-index:2;pointer-events:none;
   background:
     linear-gradient(180deg, rgba(6,10,14,.55) 0%, rgba(6,10,14,.05) 26%),
-    linear-gradient(100deg, rgba(6,10,14,.62) 0%, rgba(6,10,14,.34) 30%, rgba(6,10,14,0) 62%),
+    linear-gradient(90deg, #0B0F12 0%, rgba(9,13,17,.74) 4%, rgba(8,12,16,.32) 12%,
+                            rgba(6,10,14,.18) 28%, rgba(6,10,14,0) 52%),
     radial-gradient(130% 100% at 46% 34%, rgba(0,0,0,0) 34%, rgba(6,10,14,.52) 100%);
 }
 
