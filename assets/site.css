@@ -615,6 +615,40 @@ body.dark{background:#0B0F12}
 .sc-card .cap i{display:block;font-style:normal;font-size:9.5px;color:rgba(242,240,234,.6);margin-top:3px;opacity:0;transition:opacity .3s linear}
 .sc-card:hover .cap i{opacity:1}
 
+/* ---------- 无脚本降级：片带不能是一片空白 ----------
+
+   2026-10-26：用户打开线上站，右侧一条卡片都没有，只剩背景和左边那行字。
+   实测线上 HTML / CSS / JS 全是 200，无头浏览器按同样的窗口尺寸（1080×630）
+   跑一遍，9 张卡全在、位置正常——所以不是布局算错，是那次 app.js 根本没执行
+   （脚本 34KB 没拉下来、被扩展拦掉、或者浏览器禁了 JS）。
+   而卡片的宽高、位置、倾角全部由脚本写行内样式，脚本一挂就是 9 个 0×0 的空盒子，
+   右侧自然只剩背景。
+
+   这里补一条纯 CSS 的退路：脚本没接管时，片带退回成一列可滚动的静态卡片，
+   有图、有片名、有阴影，只是不会自己走。app.js 画完第一帧会给 .sc-rail
+   打上 data-rail="on"，下面这些规则立刻失效，两边不打架。
+
+   padding-left 给到 132px 是为了避开 .sc-rail 那道 100px 的水平淡入——
+   退路也得让卡片从全黑区里长出来，不能一半埋在遮罩里。 */
+.sc-rail:not([data-rail]) .sc-track{
+  display:flex;flex-direction:column;gap:14px;
+  padding:clamp(40px,7vh,76px) 22px clamp(40px,7vh,76px) 120px;
+  overflow-y:auto;overscroll-behavior:contain;
+  cursor:default;touch-action:pan-y;
+  scrollbar-width:none;
+}
+.sc-rail:not([data-rail]) .sc-track::-webkit-scrollbar{display:none}
+.sc-rail:not([data-rail]) .sc-card{
+  position:relative;left:auto;top:auto;
+  width:100%;height:auto;aspect-ratio:2 / 1;
+  flex:0 0 auto;
+  /* 静态排布下没有逐帧 transform，will-change 只会白白占一层合成 */
+  will-change:auto;
+}
+/* 鼠标悬停时那张卡不再「抽出来」，但字幕玻璃片留着——静态版也需要看得清片名 */
+.sc-rail:not([data-rail]) .sc-card .cap{padding:6px 9px}
+
+
 /* ---------- 入场 ---------- */
 @keyframes sc-rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 .sc-kicker,.sc-hero h1,.sc-en,.sc-sub{animation:sc-rise 1.15s var(--ease) both}
@@ -682,6 +716,16 @@ body.dark{background:#0B0F12}
      桌面那条是 touch-action:none（整条带子吃掉手势），手机上不能这么干——
      首页在短屏上是要滚一点点的，带子把竖划吃掉，手指按在带子上就卡住了。 */
   .sc-track{touch-action:pan-y}
+  /* 无脚本降级在窄屏要横过来：桌面那套竖排一列塞进 208px 高的带子里，只剩一张半。
+     横排、可横划，跟脚本接管后的走向一致。 */
+  .sc-rail:not([data-rail]) .sc-track{
+    flex-direction:row;align-items:center;
+    padding:0 20px;gap:12px;
+    overflow-x:auto;overflow-y:hidden;
+  }
+  .sc-rail:not([data-rail]) .sc-card{
+    width:auto;height:calc(100% - 22px);flex:0 0 auto;
+  }
   .sc-card .cap{left:12px;right:12px;bottom:10px}
   .sc-card .cap b{font-size:11.5px}
   .sc-card .cap i{font-size:9px}
