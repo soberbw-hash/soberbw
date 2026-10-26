@@ -665,8 +665,8 @@ const indexBody = `<main class="sc-stage">
 
   <aside class="sc-rail" aria-label="作品">
     <div class="sc-track" id="rail">
-      ${RAIL.map((r) => `<a class="sc-card" href="work/${r.slug}.html">
-        <div class="art"><img src="img/work/${r.rail || coverOf(r)}.jpg" alt="" loading="lazy"></div>
+      ${RAIL.map((r, ri) => `<a class="sc-card" href="work/${r.slug}.html">
+        <div class="art"><img src="img/work/${r.rail || coverOf(r)}.jpg" alt="" ${ri < 3 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async"></div>
         <div class="cap"><b>${r.short || r.title}</b><i>${r.cap}</i></div>
       </a>`).join('\n      ')}
     </div>
