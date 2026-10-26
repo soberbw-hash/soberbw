@@ -2,11 +2,11 @@
 
 影像创作者的作品集 —— 导演 / 剪辑。15 个页面，纯静态。
 
-**[→ 打开站点](https://soberbw-hash.github.io/soberbw/)**
-　·　[作品](https://soberbw-hash.github.io/soberbw/work.html)
-　·　[简历](https://soberbw-hash.github.io/soberbw/resume.html)
-　·　[软件](https://soberbw-hash.github.io/soberbw/tools.html)
-　·　[联系](https://soberbw-hash.github.io/soberbw/contact.html)
+**[→ 打开站点](https://soberbw-hash.github.io/soberbw-web/)**
+　·　[作品](https://soberbw-hash.github.io/soberbw-web/work.html)
+　·　[简历](https://soberbw-hash.github.io/soberbw-web/resume.html)
+　·　[软件](https://soberbw-hash.github.io/soberbw-web/tools.html)
+　·　[联系](https://soberbw-hash.github.io/soberbw-web/contact.html)
 
 ![首页：左边巨型姓名，右边竖着走的胶片](img/readme-cover.jpg)
 
@@ -18,7 +18,7 @@
 
 | 项 | 情况 |
 |---|---|
-| 线上地址 | <https://soberbw-hash.github.io/soberbw/> |
+| 线上地址 | <https://soberbw-hash.github.io/soberbw-web/> |
 | 目标域名 | `soberbw.cn` —— **还没绑定**（DNS 未配置），所以现在只有上面那个 github.io 地址能打开 |
 | 页面数 | 15：首页 / 作品 / 简历 / 软件 / 联系 / 滚动浏览（browse）+ 9 个作品详情 |
 | 部署方式 | GitHub Pages，`main` 分支，推上去约 1 分钟自动生效 |
@@ -311,24 +311,25 @@ box-shadow:
 
 ## 二、换一台电脑怎么接手（最短路径）
 
-这个仓库只是**发布源**（站点成品）。原始素材、研究记录、全部 `tools/` 脚本和每天的工作日志在另一个**私有**仓库 **`soberbw-hash/soberbw-workspace`** 里——那里才是工作区。
+这个仓库只是**发布源**（站点成品）。样式和脚本的源码、构建脚本、原始素材、工作日志全在另一个**私有**仓库 **`soberbw-hash/soberbw-code`** 里。
+
+**这个仓库不要直接改。** 这里每一个 `.html` 都是 `build-site.mjs` 生成的，`assets/` 是从 `src/assets/` 复制过来的，下次部署整个覆盖。`_src/` 里那份脚本快照只是方便你读，改了不生效。
 
 ```bash
-# 只改文案、改样式：克隆这个仓库就够
-git clone https://github.com/soberbw-hash/soberbw.git
-cd soberbw
-node _src/build-site.mjs        # 重新生成全部 HTML
-```
+# 要改任何东西：克隆私有仓库
+git clone https://github.com/soberbw-hash/soberbw-code.git
+cd soberbw-code
 
-```bash
-# 要从头做（换素材、改版式、看每一轮为什么这么改）：两个都要
-git clone https://github.com/soberbw-hash/soberbw-workspace.git   # 私有，要登录
-cd soberbw-workspace
-git clone https://github.com/soberbw-hash/soberbw.git site         # 构建脚本要从 site/ 读图片和视频
+# 拿成品放到 site/ —— 构建脚本要从这里读图片和视频
+git clone https://github.com/soberbw-hash/soberbw-web.git site
+
+# 改 src/assets/ 里的样式，或改 tools/build-site.mjs 里的文案
 node tools/build-site.mjs
+node tools/linkcheck.mjs
+node tools/deploy.mjs        # 自动推到 soberbw-web
 ```
 
-改内容 → 重跑这一句 → `git add -A && git commit -m "说明" && git push`。等一分钟就上线。
+改完最后那一句，等一分钟就上线。
 
 不需要装任何依赖。Node 18 以上即可（用到了 `node:fs` / `node:crypto` 的标准 API）。
 
@@ -340,17 +341,18 @@ node tools/build-site.mjs
 
 ## 三、仓库里有什么
 
-| 路径 | 是什么 | 能不能直接改 |
+**全部是产物。** 这个仓库里没有「源码」，改什么都会在下次部署时被覆盖。真要改，去 `soberbw-code`。
+
+| 路径 | 是什么 | 源码在 `soberbw-code` 的哪 |
 |---|---|---|
-| `_src/build-site.mjs` | **唯一的内容源**：作品、履历、联系方式、软件项目、页面模板 | ✅ 改这个 |
-| `_src/deploy.mjs` | 在工作区里用的部署脚本（仓库里这份只是快照） | 一般不用 |
-| `assets/site.css` | 全部样式，约 1800 行 | ✅ |
-| `assets/app.js` | 首页：云层 canvas、右侧片带、字体加载、页面转场 | ✅ |
-| `assets/scroll.js` | 滚动浏览页（browse）的分屏吸附与进度点 | ✅ |
-| `assets/copy.js` | 联系页的「点击复制微信号」 | ✅ |
-| `index.html` / `work.html` / … | 生成结果 | ❌ 会被覆盖 |
-| `img/` `fonts/` `media/` | 剧照、字体子集、首页背景视频 | ✅ 可以加 |
-| `sitemap.xml` / `robots.txt` | 构建时自动生成 | ❌ 会被覆盖 |
+| `assets/site.css` | 全部样式，约 1900 行 | `src/assets/site.css` |
+| `assets/app.js` | 首页：云层 canvas、右侧片带、字体加载、页面转场 | `src/assets/app.js` |
+| `assets/scroll.js` | 滚动浏览页（browse）的分屏吸附与进度点 | `src/assets/scroll.js` |
+| `assets/copy.js` | 联系页的「点击复制微信号」 | `src/assets/copy.js` |
+| `index.html` / `work.html` / … | 页面 | `tools/build-site.mjs`（唯一内容源） |
+| `sitemap.xml` / `robots.txt` | 站点地图 | 构建时生成 |
+| `_src/` | 构建脚本快照，方便你读 | `tools/` |
+| `img/` `fonts/` `media/` | 剧照、字体子集、首页背景视频 | `素材库/`（原始素材） |
 
 `_src/` 这个目录名带下划线，GitHub Pages 的 Jekyll 会跳过它，所以它不会作为页面发布出去——但它在仓库里，`git clone` 拿得到。
 
@@ -489,7 +491,7 @@ npx --yes http-server . -p 4399
 
 ### 1. 绑定域名 `soberbw.cn`（最该先做，5 分钟）
 
-现在能打开的只有 <https://soberbw-hash.github.io/soberbw/>。`soberbw.cn` 还没配 DNS。
+现在能打开的只有 <https://soberbw-hash.github.io/soberbw-web/>。`soberbw.cn` 还没配 DNS。
 
 **顺序不能反**，反了会出现「网站打不开」的假象：
 

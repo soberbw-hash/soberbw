@@ -1,4 +1,4 @@
-// 把 site/ 的内容推到 soberbw-hash/soberbw 的 main 分支（GitHub Pages 源）。
+// 把 site/ 的内容推到 soberbw-hash/soberbw-web 的 main 分支（GitHub Pages 源）。
 // 用 .tmp/deploy/repo 做中转，避免把 research / materials / tools 带上去。
 // 注意：不要整目录删除（会被批量删除保护拦下），一律用 git 自己清。
 //
@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process';
 import { cpSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-const REPO = 'soberbw-hash/soberbw';
+const REPO = 'soberbw-hash/soberbw-web';
 const WORK = resolve('.tmp/deploy');
 const TARGET = join(WORK, 'repo');
 const SITE = resolve('site');

@@ -1,6 +1,6 @@
 // 生成 soberbw.cn 静态站：index / works / about / work/*.html
 // 纯静态输出，无运行时依赖。改内容只需改本文件的 DATA 区块后重跑。
-import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, readdirSync, copyFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -12,6 +12,24 @@ import { createHash } from 'node:crypto';
    而 git status 干干净净，看着像「构建成功但没生效」。 */
 const ROOT = existsSync('site') ? 'site' : '.';
 const SITE = 'https://soberbw.cn';
+
+/* ---------- 先把源码铺进输出目录 ----------
+   样式和脚本的源文件放在 src/assets/，不放在 site/assets/。
+
+   为什么：site/ 是产物目录，每次部署都被整个复制到公开仓库；而 .gitignore
+   排除了 site/，所以放在那儿的源码在私有仓库里**没有任何备份**——改了三个月
+   的 site.css 只存在于一个公开仓库里，本地硬盘一坏就没了。
+
+   现在 src/ 存源码（私有仓库收录，有完整版本历史），build 时复制到 site/assets/，
+   部署脚本照旧整个搬走。两步之间没有任何内容改动，指纹不会变。
+
+   在 clone 下来的仓库里跑时没有 src/（那里只有 assets/），跳过这一步。 */
+if (existsSync('src/assets')) {
+  mkdirSync(join(ROOT, 'assets'), { recursive: true });
+  for (const f of readdirSync('src/assets')) {
+    copyFileSync(join('src/assets', f), join(ROOT, 'assets', f));
+  }
+}
 
 /* ---------- 站点图标 ----------
    深墨底 + 四角取景框。
