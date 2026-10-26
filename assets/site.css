@@ -1188,6 +1188,13 @@ body.dt-page>main{width:100%;padding-top:0}
   transition:background .28s,border-color .28s;
 }
 .exp-list label:hover{background:rgba(0,0,0,.028)}
+/* radio 保留原生方向键切换；将隐藏输入的焦点投射到可见标签。 */
+#exp-0:focus-visible~.exp-list label[for="exp-0"],
+#exp-1:focus-visible~.exp-list label[for="exp-1"],
+#exp-2:focus-visible~.exp-list label[for="exp-2"],
+#exp-3:focus-visible~.exp-list label[for="exp-3"]{
+  outline:2px solid var(--accent);outline-offset:3px;border-radius:2px;
+}
 .exp-list .mark{
   width:26px;height:26px;border-radius:7px;flex:0 0 auto;
   display:grid;place-items:center;
@@ -1912,6 +1919,7 @@ body.bz-page .topbar::after{
   .topbar nav{gap:0}
   .topbar nav a{
     position:relative;
+    min-width:44px;text-align:center;
     padding:14px 8px;
     border-bottom:0;
   }

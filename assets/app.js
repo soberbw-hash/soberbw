@@ -375,42 +375,53 @@
     var speed = reduce ? 0 : (mobile ? 11 : 18);
     // 拖拽跟着哪个轴走：横向带子看 X，竖向看 Y。每次按下时取一次，
     // 拖到一半窗口跨过断点也不会突然换轴。
-    var axisX = false;
+    var axisX = false, activePointer = null;
 
     track.addEventListener('pointerenter', function () { paused = true; });
     track.addEventListener('pointerleave', function () { paused = false; });
 
     track.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 || e.isPrimary === false) return;
       dragging = true; moved = 0; vel = 0;
+      activePointer = e.pointerId;
       axisX = horiz;
       lastP = axisX ? e.clientX : e.clientY;
       lastT = performance.now();
       track.classList.add('dragging');
-      track.setPointerCapture(e.pointerId);
+      // 普通点击保留在原链接上；立即捕获会把 click 重定向到 track，作品打不开。
     });
     track.addEventListener('pointermove', function (e) {
-      if (!dragging) return;
+      if (!dragging || e.pointerId !== activePointer) return;
       var now = performance.now();
       var dt = Math.max(8, now - lastT) / 1000;
       var p = axisX ? e.clientX : e.clientY;
       var dy = p - lastP;
       lastP = p; lastT = now;
-      moved += dy;
+      moved += Math.abs(dy);
+      if (moved > 6 && !track.hasPointerCapture(e.pointerId)) {
+        track.setPointerCapture(e.pointerId);
+      }
       offset += dy;                 // 跟手 1:1
       vel = dy / dt;
       fric = FRIC_DRAG;             // 松手之后按「扔出去」那套衰减
     });
-    function endDrag() {
-      if (!dragging) return;
+    function endDrag(e) {
+      if (!dragging || e.pointerId !== activePointer) return;
       dragging = false;
+      activePointer = null;
       track.classList.remove('dragging');
       // 拖完几乎没动，就当点击处理，别把链接拦掉
-      if (Math.abs(moved) > 6) {
-        track.addEventListener('click', function (ev) { ev.preventDefault(); }, { once: true });
+      if (moved > 6 && e.type !== 'pointercancel') {
+        var suppressClick = function (ev) { ev.preventDefault(); };
+        track.addEventListener('click', suppressClick, { once: true, capture: true });
+        // cancel 或未产生 click 时不能把拦截器留给下一次正常点击。
+        setTimeout(function () { track.removeEventListener('click', suppressClick, true); }, 0);
       }
     }
     track.addEventListener('pointerup', endDrag);
     track.addEventListener('pointercancel', endDrag);
+    addEventListener('pointerup', endDrag);
+    addEventListener('pointercancel', endDrag);
 
     /* 滚轮：光标停在带子上时，滚轮直接滚这条带子。
        首页正好一屏、页面本身没有滚动条，所以这里吃掉默认行为不会有副作用。
@@ -626,6 +637,11 @@
       if (document.hidden) film.pause();
       else film.play().catch(function () {});
     });
+    // 片源延后到偏好判断之后，减少动态或无脚本时只取静态海报。
+    film.querySelectorAll('source[data-src]').forEach(function (s) {
+      s.src = s.getAttribute('data-src');
+    });
+    film.load();
     var p = film.play();
     if (p && p.catch) p.catch(function () {});
   }

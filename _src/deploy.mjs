@@ -14,33 +14,20 @@ const TARGET = join(WORK, 'repo');
 const SITE = resolve('site');
 const dry = process.argv.includes('--dry');
 
-// 必须带 username：这台机器上凭据是存在 git:https://x-access-token@github.com 这个
-// 目标下的，只给 host 的话 GCM 找不到，会转去弹 GUI 登录框，在无头环境里就静默挂死。
-const token = (() => {
-  try {
-    return execSync('git credential fill', {
-      input: 'protocol=https\nhost=github.com\nusername=x-access-token\n\n',
-      encoding: 'utf8',
-      env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
-      timeout: 30000,
-    }).match(/^password=(.+)$/m)?.[1];
-  } catch {
-    return null;
-  }
-})();
-if (!token) throw new Error('拿不到 GitHub token：请在终端里手动 git push 一次完成登录，再重跑');
+// 显式用户名匹配已保存的 Git 凭据。令 Git 使用凭据助手，避免把 token 写入
+// remote URL、进程命令行或失败日志；禁止无人值守时弹出认证窗口。
+const remoteUrl = `https://x-access-token@github.com/${REPO}.git`;
+const gitEnv = { ...process.env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'Never' };
 
 const run = (cmd, cwd = TARGET) =>
-  execSync(cmd, { cwd, stdio: 'inherit', env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
+  execSync(cmd, { cwd, stdio: 'inherit', env: gitEnv, timeout: 180000 });
 
 mkdirSync(WORK, { recursive: true });
 
 if (existsSync(join(TARGET, '.git'))) {
   console.log('== 复用已有仓库 ==');
-  // origin 里不带 token 的话，ls-remote / fetch 会去问凭据管理器，
-  // 非交互环境下就静静挂住（曾经挂过 25 分钟）。这里先把 token 塞进去。
-  run(`git remote set-url origin https://x-access-token:${token}@github.com/${REPO}.git`);
-  const env = { ...process.env, GIT_TERMINAL_PROMPT: '0' };
+  run(`git remote set-url origin ${remoteUrl}`);
+  const env = gitEnv;
   // 本地 HEAD 已经等于远端就别再 fetch 了：--depth 1 的浅仓库每次 fetch
   // 都会把 30MB 图片重新下一遍，网络一慢就挂在这儿十几分钟。
   const local = execSync('git rev-parse HEAD', { cwd: TARGET, encoding: 'utf8' }).trim();
@@ -58,7 +45,7 @@ if (existsSync(join(TARGET, '.git'))) {
   run('git clean -fdx -q');
 } else {
   console.log('== 拉取仓库 ==');
-  run(`git clone --depth 1 --branch main https://x-access-token:${token}@github.com/${REPO}.git repo`, WORK);
+  run(`git clone --depth 1 --branch main ${remoteUrl} repo`, WORK);
 }
 
 // 用 git 清空工作区（不走 fs 删除）

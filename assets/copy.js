@@ -47,11 +47,24 @@
       }, 2000);
     }
 
+    function failed() {
+      // 两种复制方式都失败时，把实际微信号选中，支持手动 Ctrl+C。
+      var value = el.querySelector('b');
+      var selection = window.getSelection && window.getSelection();
+      if (value && selection) {
+        var range = document.createRange();
+        range.selectNodeContents(value);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      say('复制失败，请手动选中', 'failed');
+    }
+
     el.addEventListener('click', function () {
       // 没有 clipboard API：直接走老路，成不成看返回值
       if (!navigator.clipboard || !navigator.clipboard.writeText) {
         if (legacyCopy(text)) say('已复制 ' + text, 'copied');
-        else say('复制失败，请手动选中', 'failed');
+        else failed();
         return;
       }
 
@@ -61,7 +74,7 @@
           /* 用户拒绝授权、页面失焦、或者不是 https——都走这里。
              先试一次老办法，还不行才认输。 */
           if (legacyCopy(text)) say('已复制 ' + text, 'copied');
-          else say('复制失败，请手动选中', 'failed');
+          else failed();
         }
       );
     });

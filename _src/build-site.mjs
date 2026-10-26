@@ -166,7 +166,7 @@ const WORKS = [
       '全片配中英双语字幕，可在线观看。',
     ],
     imgs: ['nushu-huixiang-1','nushu-huixiang-2','nushu-huixiang-3','nushu-huixiang-4','nushu-huixiang-5','nushu-huixiang-6'],
-    href: 'https://www.xinpianchang.com/a13476909?from=UserProfile',
+    href: '', // 已知地址与作品不符，待本人提供正确链接后恢复。
     hrefLabel: '新片场',
   },
   {
@@ -235,7 +235,7 @@ const VERTICAL = [
     cover: 'zhiyun-cover',
     // 首页那条竖着滚的带子用 2:1，竖版封面进去会被切掉三分之二，这里另指一张横的
     rail: 'zhiyun-5',
-    href: 'https://www.douyin.com/video/7495610857691319563',
+    href: '', // 交接已确认地址不正确，不能继续误导访客。
     hrefLabel: '抖音',
   },
   {
@@ -252,7 +252,7 @@ const VERTICAL = [
     imgs: ['zhiyun-3','zhiyun-1','zhiyun-2','douyin-4','zhiyun-6','zhiyun-4'],
     cover: 'x100-cover', hero: 'x100-hero',
     rail: 'zhiyun-3',
-    href: 'https://www.douyin.com/video/7458104745123695884',
+    href: '', // 交接已确认地址不正确，不能继续误导访客。
     hrefLabel: '抖音',
   },
   {
@@ -629,7 +629,7 @@ const indexBody = `<main class="sc-stage">
   <video class="sc-film" id="film" aria-hidden="true" tabindex="-1"
          autoplay muted loop playsinline preload="auto" disablepictureinpicture
          poster="media/island-poster.jpg">
-    <source src="media/island-loop.mp4" type="video/mp4">
+    <source data-src="media/island-loop.mp4" type="video/mp4">
   </video>
   <canvas class="sc-sky" id="sky" aria-hidden="true"></canvas>
 
@@ -990,7 +990,7 @@ const contactBody = `<main class="wrap contact-page">
     <button class="ct-main ct-copy" type="button" data-copy="${CONTACT.wechat}">
       <span class="ct-k">微信</span>
       <b>${CONTACT.wechat}</b>
-      <i class="ct-hint">点击复制</i>
+      <i class="ct-hint" role="status" aria-live="polite">点击复制</i>
     </button>
   </div>
 
@@ -1023,9 +1023,9 @@ ${inner}
   </section>`;
 };
 
-const browseBody = `<div class="bz">
+const browseBody = `<main class="bz">
 ${PANES.map(([k, l, b]) => paneOf(k, l, b)).join('\n')}
-</div>
+</main>
 
 <nav class="bz-dots" aria-label="跳到某一屏">
 ${PANES.map(([k, l], i) => `  <a href="#${k}" data-go="${k}"><i></i><span>${String(i + 1).padStart(2, '0')} ${l}</span></a>`).join('\n')}
@@ -1050,10 +1050,8 @@ writeFileSync(join(ROOT, 'browse.html'), layout({
   desc: '尤博文的作品、简历、软件与联系方式，一屏一屏往下看。',
   bodyClass: 'inner bz-page',
   htmlClass: 'snap',
-  /* app.js 也得带上：联系屏的「点击复制」绑在它里面。
-     只挂 scroll.js 的话，首页和单独的联系页都能复制，唯独从导航进去的
-     主路径点不动——最难发现的那种坏法。 */
-  script: ['app.js', 'scroll.js'],
+  // 复制逻辑已独立到 copy.js，浏览页不需要首页的云海与片带脚本。
+  script: ['copy.js', 'scroll.js'],
   path: 'browse.html',
   body: browseBody,
 }));
@@ -1116,6 +1114,18 @@ writeFileSync(join(ROOT, 'contact.html'), layout({
 
 writeFileSync(join(ROOT, 'assets', 'favicon.svg'), FAVICON_SVG);
 
+writeFileSync(join(ROOT, '404.html'), layout({
+  title: '页面未找到 — 尤博文的个人主页',
+  desc: '这个页面不存在或已经移动。返回首页或继续浏览作品。',
+  path: '404.html',
+  bodyClass: 'inner',
+  body: `<main class="wrap contact-page"><header class="ct-head"><h1>404</h1>
+    <p>这个页面不存在或已经移动。</p></header>
+    <p><a href="/index.html">返回首页</a> · <a href="/browse.html#work">浏览作品</a></p></main>`,
+}).replace('<meta name="description"', '<meta name="robots" content="noindex">\n<meta name="description"')
+  // 404 可能出现在任意深度路径，所有站内 URL 必须从根目录解析。
+  .replace('<head>', '<head>\n<base href="/">'));
+
 /* ---------- sitemap / robots ----------
 
    sitemap 跟着构建一起生成，不手写：作品增减时手写的那份必然忘记同步，
@@ -1155,4 +1165,4 @@ Sitemap: ${SITE}/sitemap.xml
 writeFileSync(join(ROOT, 'CNAME'), `${SITE.replace(/^https?:\/\//, '')}\n`);
 
 console.log('生成完成：index / browse / work / resume / tools / contact + ' +
-  ALL.length + ' 个作品页 + sitemap/robots/CNAME');
+  ALL.length + ' 个作品页 + 404/sitemap/robots/CNAME');

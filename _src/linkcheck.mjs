@@ -23,7 +23,10 @@ for (const f of files) {
     // 先剥掉 ?v=532bec43 这类查询串，再剥 #hash。
     // 只剥 # 的话，所有带资源指纹的 css/js/图标都会被报成 MISS——
     // 第一版就是这样，81 条「缺失」里全是假警报，真缺的一个没抓出来。
-    const target = resolve(dirname(f), href.split('#')[0].split('?')[0]);
+    const localPath = href.split('#')[0].split('?')[0];
+    const target = localPath.startsWith('/')
+      ? resolve(ROOT, '.' + localPath)
+      : resolve(dirname(f), localPath);
     if (!existsSync(target)) {
       console.log('MISS', f, '->', href);
       bad++;

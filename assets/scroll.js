@@ -128,6 +128,7 @@
   }
 
   document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
     var a = e.target.closest ? e.target.closest('a') : null;
     if (!a) return;
     var href = a.getAttribute('href');
@@ -169,7 +170,7 @@
   function savedY() {
     var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
     if (!nav || nav.type !== 'back_forward') return NaN;
-    return parseFloat(sessionStorage.getItem(KEY));
+    try { return parseFloat(sessionStorage.getItem(KEY)); } catch (e) { return NaN; }
   }
   function restoreY() {
     var y = savedY();
