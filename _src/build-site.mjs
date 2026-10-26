@@ -1146,5 +1146,13 @@ Allow: /
 Sitemap: ${SITE}/sitemap.xml
 `);
 
+/* ---------- CNAME ----------
+   GitHub Pages 靠仓库根目录这个文件判断自定义域名。deploy.mjs 每次都会
+   `git rm -r .` 把仓库清空重填，所以它必须跟着构建一起生成——否则域名会
+   在下一次部署时悄悄掉掉，而 Settings → Pages 里还显示着域名，很难查出来。
+
+   内容只能是一行裸域名：不能带 https://、不能有末尾斜杠、不能有注释。 */
+writeFileSync(join(ROOT, 'CNAME'), `${SITE.replace(/^https?:\/\//, '')}\n`);
+
 console.log('生成完成：index / browse / work / resume / tools / contact + ' +
-  ALL.length + ' 个作品页 + sitemap/robots');
+  ALL.length + ' 个作品页 + sitemap/robots/CNAME');
