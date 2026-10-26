@@ -2,11 +2,11 @@
 
 影像创作者的作品集 —— 导演 / 剪辑。15 个页面，纯静态。
 
-**[→ 打开站点](https://soberbw-hash.github.io/soberbw-web/)**
-　·　[作品](https://soberbw-hash.github.io/soberbw-web/work.html)
-　·　[简历](https://soberbw-hash.github.io/soberbw-web/resume.html)
-　·　[软件](https://soberbw-hash.github.io/soberbw-web/tools.html)
-　·　[联系](https://soberbw-hash.github.io/soberbw-web/contact.html)
+**[→ 打开站点](https://soberbw.cn/)**
+　·　[作品](https://soberbw.cn/work.html)
+　·　[简历](https://soberbw.cn/resume.html)
+　·　[软件](https://soberbw.cn/tools.html)
+　·　[联系](https://soberbw.cn/contact.html)
 
 ![首页：左边巨型姓名，右边竖着走的胶片](img/readme-cover.jpg)
 
@@ -18,13 +18,13 @@
 
 | 项 | 情况 |
 |---|---|
-| 线上地址 | <https://soberbw-hash.github.io/soberbw-web/> |
-| 目标域名 | `soberbw.cn` —— **还没绑定**（DNS 未配置），所以现在只有上面那个 github.io 地址能打开 |
+| 线上地址 | <https://soberbw.cn/> |
+| 域名 | `soberbw.cn` ✅ 已绑定（DNSPod → GitHub Pages，Let's Encrypt 证书，强制 HTTPS 已开） |
 | 页面数 | 15：首页 / 作品 / 简历 / 软件 / 联系 / 滚动浏览（browse）+ 9 个作品详情 |
 | 部署方式 | GitHub Pages，`main` 分支，推上去约 1 分钟自动生效 |
 | 资源指纹 | `site.css?v=700c3d4c`、`app.js?v=700c3d4c` —— 线上跑的是不是这一版，看这两个值 |
 
-`canonical`、`og:url`、`sitemap.xml` 里写的都已经是 `https://soberbw.cn`。域名一绑上，这些就自动对上了；在那之前，它们指向一个还打不开的地址。
+`canonical`、`og:url`、`sitemap.xml` 里写的都是 `https://soberbw.cn`，和实际域名一致。
 
 > 上面那张封面图 `img/readme-cover.jpg` 是 1920×1326 的线上截图缩到 1440 宽，只用在这份 README 里，页面本身不引用它。改了首页外观之后想换封面，重截一张、同样缩到 1440 覆盖即可。
 
@@ -489,27 +489,29 @@ npx --yes http-server . -p 4399
 
 不需要素材、不需要本人判断的改动，这一轮已经全部做完了（见第一节的改版清单）。下面这些**卡在没有素材或没有口述**，代写就等于编造，所以留在这里。
 
-### 1. 绑定域名 `soberbw.cn`（最该先做，5 分钟）
+### 1. 域名 `soberbw.cn` ✅ 已绑定（2026-10-26）
 
-现在能打开的只有 <https://soberbw-hash.github.io/soberbw-web/>。`soberbw.cn` 还没配 DNS。
+| 项 | 值 |
+|---|---|
+| DNS 托管 | 腾讯云 DNSPod（`crackers.dnspod.net` / `sorb.dnspod.net`） |
+| 根域名 | 2 条 A：`185.199.110.153`、`185.199.111.153`<br>2 条 AAAA：`2606:50c0:8000::153`、`2606:50c0:8001::153` |
+| www | CNAME → `soberbw-hash.github.io` |
+| 证书 | Let's Encrypt，`CN=soberbw.cn`，同时覆盖根域名和 www，GitHub 自动续期 |
+| 跳转 | `http://` → `https://`，`www` → 根域名，旧的 github.io 地址 → 根域名，全部 301 |
 
-**顺序不能反**，反了会出现「网站打不开」的假象：
+**为什么只有 2 条 A 记录，而不是 GitHub 官方推荐的 4 条**
 
-1. 先去腾讯云 DNSPod，给 `soberbw.cn` 加 5 条记录：
+DNSPod 免费版对同一个子域名下的同类型记录**限 2 条**，加第 3 条会报「子域名负载均衡数量超出套餐限制」。
 
-   | 主机记录 | 类型 | 记录值 |
-   |---|---|---|
-   | `@` | A | `185.199.108.153` |
-   | `@` | A | `185.199.109.153` |
-   | `@` | A | `185.199.110.153` |
-   | `@` | A | `185.199.111.153` |
-   | `www` | CNAME | `soberbw-hash.github.io.` |
+GitHub 那 4 个 IP 是 anycast 边缘节点，**任意一个都能服务整个站点**，不是凑齐 4 条才能用。2 条实际完全够；缺的 2 个节点用 AAAA 记录补上了——IPv6 记录单独计数，不占那 2 条 A 的名额。
 
-2. 等 DNS 生效（`nslookup soberbw.cn` 能看到上面四个 IP 就算生效，一般几分钟）。
+**以后不要手动改这几条 DNS。** 尤其是别把 `www` 的 CNAME 改成 A 记录，也别为了「凑 4 条」去升级 DNSPod 套餐，没必要。
 
-3. **最后**再去 GitHub 仓库 → Settings → Pages → Custom domain 填 `soberbw.cn`，勾上 Enforce HTTPS。
+**`CNAME` 文件必须由构建生成**
 
-如果先做第 3 步：GitHub 会立刻把 github.io 地址重定向到一个还没解析的域名，看起来就像站挂了。真搞反了也别慌，把 Custom domain 清空就恢复。
+`build-site.mjs` 会写一个 `CNAME` 文件（内容就一行 `soberbw.cn`）。这一步不能省：`deploy.mjs` 每次都会 `git rm -r .` 把仓库清空重填，手写一个 `CNAME` 会被删掉——域名跟着掉，而 Settings → Pages 里还显示着域名，非常难查。
+
+> 备案：**不需要**。ICP 备案只管服务器在中国大陆境内的网站，GitHub Pages 的服务器在境外，域名解析过去不需要备案。只有以后把站搬到自己的阿里云服务器，才需要走备案流程（7–20 个工作日）。
 
 ### 2. 两个「观看」链接是错的
 
