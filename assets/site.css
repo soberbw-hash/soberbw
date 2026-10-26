@@ -1042,11 +1042,12 @@ body.dt-page>main{width:100%;padding-top:0}
    2026-10-26 二次调整：用户说手机上这三段「挤在一起」。
    量出来（390×844）是三句各两行、行高 23.2px、句间距只有 3px——
    行距对 13.5px 的中文本来就偏紧，句间再贴 3px，六行读起来就是一整块灰。
-   现在：字号 13.5→14，行高 1.72→1.9（每行 26.6px），句间距 3→10px。
-   代价是三句总高从 145 涨到 180，靠收名字字号（23→22vw）、
-   收顶上留白（13→10vh）、收 en 和 sub 的上边距一起还回去，总高基本不变。 */
+   第一版改成 14px / 1.9 / 句距 10px，行距是够了，但用户又说「画面塞得太满」，
+   字号再降一号到 13px，行高跟着提到 1.95（25.35px/行）——
+   字小了、行距反而更松，文字块占屏的比例明显下来，画面才不挤。
+   句间距保持 10px：三句各说一件事，得看得出是三条。 */
 @media (max-width:900px){
-  .sc-sub{font-size:14px;line-height:1.9}
+  .sc-sub{font-size:13px;line-height:1.95}
   .sc-sub li+li{margin-top:10px}
 }
 
@@ -1556,7 +1557,13 @@ body.dt-page>main{width:100%;padding-top:0}
 @media (max-width:960px){
   .rs-head{grid-template-columns:1fr;gap:clamp(22px,4vh,34px)}
   .exp,.proj{grid-template-columns:1fr;gap:clamp(20px,3.4vh,30px)}
-  .exp-list{grid-auto-flow:row;border-left:0;border-top:1px solid var(--rule-d)}
+  /* 单列时左栏必须退出 sticky。
+     2026-10-26：用户截图里整页「叠起来、字互相穿透」——就是这条漏了。
+     桌面是两栏，sticky 让经历列表钉在左栏跟着滚；变成一列之后，
+     列表和正文进了同一个流，sticky 仍然生效，列表脱流浮在正文上方，
+     下面那段内容滚过来的时候就从字里穿过去。 */
+  .exp-list{grid-auto-flow:row;border-left:0;border-top:1px solid var(--rule-d);
+    position:static;top:auto}
   .exp-list label{border-left:0;border-top:2px solid transparent;margin-left:0;padding:12px 4px}
   #exp-0:checked~.exp-list label[for="exp-0"],
   #exp-1:checked~.exp-list label[for="exp-1"],
@@ -1914,8 +1921,11 @@ body.bz-page .topbar::after{
   }
   .topbar nav a:hover::after,
   .topbar nav a[aria-current]::after{background:var(--gold)}
-  /* 站名本身也是回首页的链接，一起撑到 44 */
-  .mark{display:inline-flex;align-items:center;min-height:44px}
+  /* 站名本身也是回首页的链接，一起撑到 44。
+     必须限定 .topbar：`.mark` 这个类名经历列表的图标徽章也在用，
+     不限定的话徽章被撑成 30×44，96×96 的方图被 object-fit 拉高裁切——
+     2026-10-26 用户截图里绿联、智云、森鑫的标全变形，就是这条误伤。 */
+  .topbar .mark{display:inline-flex;align-items:center;min-height:44px}
 
   /* 详情页顶部的「← 全部作品 / 尤博文」，下划线同样挪到 ::after */
   .dt-top a{padding:12px 0;border-bottom:0;position:relative}
