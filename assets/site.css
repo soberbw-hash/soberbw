@@ -684,13 +684,17 @@ body.dark{background:#0B0F12}
        带子贴着底，中间空出三百多像素，像漏了一块。居中之后空白被摊到上下两边，
        同一个屏变成「上面留白 / 中间是字 / 下面留白 / 带子」的对称结构。
        矮屏（640/667）本来就没有富余，居中等于不居中，不影响。 */
-    flex:1 1 auto;
+    flex:1 0 auto;
     display:flex;flex-direction:column;justify-content:center;
-    padding:clamp(78px,13vh,132px) 20px 0;
+    /* 顶上留白从 13vh 收到 10vh。2026-10-26：简介行距加大之后要还回这点高度，
+       否则 390×844 上正文底部会被片带压住最后一行。
+       为什么留白能减：这一段本来就只是「让名字别贴着导航」，
+       10vh（约 84px）在 844 高的屏上已经是 1/10 屏，再少才有压迫感。 */
+    padding:clamp(64px,10vh,104px) 20px clamp(6px,1.2vh,14px);
   }
   .sc-hero-in{max-width:none}
-  .sc-hero h1{font-size:clamp(88px,23vw,150px);line-height:1.06}
-  .sc-en{gap:clamp(11px,3vw,18px);margin-top:18px}
+  .sc-hero h1{font-size:clamp(84px,22vw,150px);line-height:1.06}
+  .sc-en{gap:clamp(11px,3vw,18px);margin-top:15px}
   .sc-en .en{font-size:clamp(10px,2.6vw,11.5px);letter-spacing:.4em;margin-right:-.4em}
   .sc-en .sig{font-size:clamp(19px,5vw,28px)}
   /* 简介的字号/上边距不在这里定：这条规则在文件里排在 .sc-sub 主定义之前，
@@ -1015,11 +1019,11 @@ body.dt-page>main{width:100%;padding-top:0}
    字距从 .012em 改成 0：中文正文字距本来就是 0，那点字距在这行长度上
    要吃掉 8px 的预算，换不来任何观感。 */
 .sc-sub{
-  margin-top:clamp(20px,3vh,34px);
+  margin-top:clamp(18px,2.4vh,28px);
   list-style:none;
   max-width:min(100%,820px);
   font-size:clamp(12.5px,1vw,15px);
-  line-height:1.72;color:rgba(252,252,249,.9);
+  line-height:1.78;color:rgba(252,252,249,.9);
   text-shadow:0 1px 20px rgba(6,10,14,.62);
   /* 万一哪档宽度真的放不下（901–1267px 这一带：两栏但左栏不够宽），
      宁可折成两条一样长的，也别折成「一整行 + 两个字的尾巴」——
@@ -1033,9 +1037,17 @@ body.dt-page>main{width:100%;padding-top:0}
 
 /* 单栏（≤900）字号回到 13.5：这一档文字铺满整屏宽，一行五十来字放得下，
    没必要跟着 1vw 缩到 12.5——手机上小一号是实打实的难读。
-   必须写在这里（主定义之后），否则会被上面那条盖掉。 */
+   必须写在这里（主定义之后），否则会被上面那条盖掉。
+
+   2026-10-26 二次调整：用户说手机上这三段「挤在一起」。
+   量出来（390×844）是三句各两行、行高 23.2px、句间距只有 3px——
+   行距对 13.5px 的中文本来就偏紧，句间再贴 3px，六行读起来就是一整块灰。
+   现在：字号 13.5→14，行高 1.72→1.9（每行 26.6px），句间距 3→10px。
+   代价是三句总高从 145 涨到 180，靠收名字字号（23→22vw）、
+   收顶上留白（13→10vh）、收 en 和 sub 的上边距一起还回去，总高基本不变。 */
 @media (max-width:900px){
-  .sc-sub{font-size:13.5px}
+  .sc-sub{font-size:14px;line-height:1.9}
+  .sc-sub li+li{margin-top:10px}
 }
 
 /* ---------- 列表页：真图 ---------- */
